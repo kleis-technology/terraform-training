@@ -11,5 +11,5 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket_prefix = "stage-1"
+  bucket_prefix = "stage-1-"
 }
