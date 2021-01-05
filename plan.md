@@ -110,3 +110,19 @@
 - tuples
 
 ### HCL Utility Functions
+
+
+
+------------
+
+### State Reconciliation
+- import
+- move
+- rm
+
+### TO ADD
+- Providers sometimes do some introspection
+- Validation functions
+- No variables for backend configuration
+- git references for modules sources
+- dynamic blocks
