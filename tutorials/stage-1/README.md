@@ -1,3 +1,7 @@
+# Introduction to Terraform CLI
+
+In this first practical, we will see how to interact with the Terraform commandline client.
+
 ## Credentials
 You should have received the following information:
 - your username
