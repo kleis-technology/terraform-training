@@ -4,14 +4,26 @@ In this practical, we will interact with the State of your Terraform configurati
 
 ### Context
 
-We restart from the recipe built in the previous practical. 
-Check the content of the `stage-4.tf` file. 
-Then, re-apply the recipe.
+We restart from the recipe built in the previous practical.
+
+#### Setting/resetting recipe
+<details>
+  <summary>Click here if you need to init/reset your configuration.</summary>
+
+1. Destroy your previous terraform configuration if you had one
 ```bash
-terraform init
+terraform destroy
+```
+2. Copy the content of `tutorials/solutions/stage-2/` in your working directory and apply the configuration.
+```bash
+# if not done previously
+terraform init 
+# Check the output (replace YOUR_KEY_NAME)
 terraform plan -var "ssh_key_name=YOUR_KEY_NAME"
+# if ok, apply (replace YOUR_KEY_NAME)
 terraform apply -var "ssh_key_name=YOUR_KEY_NAME"
 ```
+</details>
 
 ### Goal
 
@@ -143,9 +155,11 @@ You will be asked if you want to copy your local State to the remote storage. An
 
 The same exact procedure can be used to initialize a Terraform configuration for the first time.
 
-### Troubleshooting
+## Troubleshooting
+You can look for the solution of this practical in `tutorials/solutions/stage-3/`.
+
 <details>
-  <summary>Having some issues? Click here for the solution.</summary>
+  <summary>Or click here to see the changes you should have made.</summary>
 
 Recipe backend block:
 ```HCL

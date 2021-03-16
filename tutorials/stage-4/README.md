@@ -8,10 +8,31 @@ Re-use the state of the remote Terraform configuration to configure the network 
 
 ### Context
 
-Look at the configuration of the previous practical: `stage-3.tf`.
+We restart from the recipe built in the previous practical.
+
+Look at the configuration resulting from the previous practical (or from its solution if you did not finish it).
 * How was the virtual network declared (i.e., `subnet_id`) ?
 * Same for the network security group/policies (i.e., `vpc_security_group_ids`).
 * What could be changed ?
+
+#### Setting/resetting the recipe
+<details>
+  <summary>Click here if you need to init/reset your configuration.</summary>
+
+1. Destroy your previous terraform configuration if you had one
+```bash
+terraform destroy
+```
+2. Copy the content of `tutorials/solutions/stage-3/` in your working directory and apply the configuration.
+```bash
+# if not done previously
+terraform init 
+# Check the output (replace YOUR_KEY_NAME)
+terraform plan -var "ssh_key_name=YOUR_KEY_NAME"
+# if ok, apply (replace YOUR_KEY_NAME)
+terraform apply -var "ssh_key_name=YOUR_KEY_NAME"
+```
+</details>
 
 ## Configuring the network using the remote state as data source
 
@@ -82,3 +103,6 @@ ssh -i PATH_TO_KEY admin@IP_ADDR
 ```bash
 terraform destroy
 ```
+
+## Troubleshooting
+You can look for the solution of this practical in `tutorials/solutions/stage-4/`.

@@ -14,9 +14,21 @@ A basic AWS infrastructure is provided to you for this practical. It includes
 * A security policy for this network that allows entering ssh connections
 * An AWS iam access key and key-pair for you username
 
+## Importing the AWS provider
+
+First, you will indicate to Terraform that you will rely on the AWS provider. 
+```HCL
+variable "ssh_key_name" {
+    type = string
+}
+```
+The list of providers is available [here](https://registry.terraform.io/browse/providers).
+The documentation for the AWS can be accessed by selecting AWS and clicking on the `Documentation` tab on the upper right corner (or [here](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)).
+
+
 ## Defining a variable
 
-First, you will define a `variable` block to identify the SSH public key used that you will use for authentication.
+Then, you will define a `variable` block to identify the SSH public key used that you will use for authentication.
 
 ```HCL
 variable "ssh_key_name" {
@@ -102,3 +114,5 @@ ssh -i /PATH/TO/SSH_KEY admin@IP_ADDR
 terraform destroy
 ```
 
+## Troubleshooting
+You can look for the solution of this practical in `tutorials/solutions/stage-2/`.
