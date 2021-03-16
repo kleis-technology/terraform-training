@@ -1,83 +1,180 @@
-# Importing a Remote State as Data Source
+# State storage
 
-In this third practical, we will see how to use another Terraform remote state as Data Source.
-
-### Goal
-
-Re-use the state of the remote Terraform configuration to configure the network in the current configuration.
+In this practical, we will interact with the State of your Terraform configuration.
 
 ### Context
 
-Look at the configuration of the previous practical: `stage-2.tf`.
-* How was the virtual network declared (i.e., `subnet_id`) ?
-* Same for the network security group/policies (i.e., `vpc_security_group_ids`).
-* What could be changed ?
-
-## Configuring the network using the remote state
-
-The remote Terraform configuration is located on an encrypted AWS S3 bucket owned by the `kleis-organization` AWS organization.
-
-### Importing the remote state as data source
-
-Importing the remote configuration is achieved by using the `terraform_remote_state` data source (see [terraform_remote_state](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state)).
-```HCL
-data "terraform_remote_state" "training" {
-  backend = "s3"
-  config = {
-    acl            = "private"
-    encrypt        = true
-    region         = "eu-west-1"
-    profile        = "kleis-sandbox"
-    role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
-    bucket         = "tfstate-kleis-organization"
-    key            = "kleis-sandbox/training/terraform.tfstate"
-    kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
-    dynamodb_table = "tfstate-lock"
-  }
-}
-```
-
-### Accessing attributes from the remote state
-
-The remote state is now available as a data source. Let's get the value for `subnet_id` and `vpc_security_group_ids`.
-These values can be found in the output of the remote state and are prefixed by: `data.terraform_remote_state.training.outputs`.
-
-We therefore update our previous declaration `aws_instance` to import the `subnet_id` and `vpc_security_group_ids`.
-```HCL
-resource "aws_instance" "vm" {
-    ami = data.aws_ami.debian-buster.id
-    instance_type = "t2.nano"
-    key_name = var.ssh_key_name
-    subnet_id = data.terraform_remote_state.training.outputs.subnet_id
-    vpc_security_group_ids = [data.terraform_remote_state.training.outputs.vm_security_group_id]
-    associate_public_ip_address = true
-    tags = {
-        Name = "stage-2-vm"
-    }
-}
-```
-
-## Using the Terraform configuration
-
-1) Initialize Terraform for this configuration
+We restart from the recipe built in the previous practical. 
+Check the content of the `stage-4.tf` file. 
+Then, re-apply the recipe.
 ```bash
 terraform init
-```
-
-2) Plan and when satisfied apply the configuration (replace `YOUR_KEY_NAME` with your username/key name).
-```bash
 terraform plan -var "ssh_key_name=YOUR_KEY_NAME"
 terraform apply -var "ssh_key_name=YOUR_KEY_NAME"
 ```
 
-3) Recover the outputs and log onto the Debian instance using your SSH key
-```bash
-terraform output # recover your IP_ADDR
+### Goal
 
-ssh -i PATH_TO_KEY admin@IP_ADDR
+* Locate and inspect the State of your Terraform configuration.
+* Explore different alternative fo its storage.
+
+## Local state
+
+By default, the state of your Terraform configuration is stored locally. 
+
+1. Locate the `terraform.tfstate` file in the current folder.
+2. Inspect its content  (e.g., using the command `cat`).
+
+*What kind of information can you find in the state?*
+* The outputs?
+* Any additional information about your VM (e.g., number of CPUs, private IP)?
+
+The current state of your configuration can equally be accessed by using the `terraform show` command.
+For instance, try
+```bash
+# Terraform formated
+terraform show
+
+# Raw json
+terraform show -json
+
+# (optional) Use jq to format or query for values
+terraform show -json | jq .
 ```
 
-4) Destroy your instance when done.
+*What are the limitation of using a local state?*
+
+## Remote state
+
+We will now migrate the configuration State to a remote storage.
+
+### A minimal backend configuration
+
+The configuration of the backend that will store the remote State can be passed either as arguments, e.g.,
 ```bash
-terraform destroy
+terraform init
+    --backend-config="key1=value1"
+    --backend-config="key2=value2"    
 ```
+or more conveniently by providing a file containing these variable definitions, e.g.,
+```bash
+terraform init --backend-config="backend.tfvars"
+```
+
+For this practical, the State will be stored on a pre-configured AWS S3 bucket (see [S3 bakend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html)).
+
+First, create the `backend.tfvars` file and add the following information about the S3 bucket
+```HCL
+region         = "eu-west-1"
+profile        = "kleis-sandbox"
+role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+bucket         = "tfstate-kleis-organization"
+key            = "kleis-sandbox/training/stage-4/YOUR_USERNAME/terraform.tfstate"
+```
+These attributes inform Terraform on the location of the S3 bucket (*region* and *bucket*), your State path (*key*) and the credientials and role to assume (*profile* and *role_arn*).
+
+Make sure to replace `MY_USERNAME` in the `key` attribute with your username. 
+
+*Can you figure out what might happen if you don't?*
+
+Finally, you must declare in your recipe that the state will be stored on an S3 bucket.
+```HCL
+terraform {
+    required_providers {
+        ... # Your providers, incl. AWS
+    }
+    backend "s3" {
+        # AWS Access control list
+        # Bucket owner has full control
+        acl     = "private"
+        encrypt = false
+    }
+}
+```
+
+### Is this minimal backend configuration sufficient?
+
+Before migrating the State, you should ask yourself several questions:
+1. Do I have sensitive data in my State? Should I encrypt it?
+2. Am I the only one working on this configuration?
+3. Is the State at risk of being concurrently accessed and written?
+
+Protecting your State from exposure and concurrent access is usually key.
+
+### Adding encryption
+To make sure that your State is duly protected, you can use the S3 bucket Server Side Encryption (SSE).
+This is enabled on the pre-configured AWS S3 bucket, thus you have to add the key ID in your `backend.tfvars` file.
+
+```HCL
+kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
+```
+
+Additionally, you must inform Terraform in your recipe that the backend is encrypted.
+```HCL
+terraform {
+    required_providers {
+        ... # Your providers, incl. AWS
+    }
+    backend "s3" {
+        acl     = "private"
+        # Set encrypt to true
+        encrypt = true
+    }
+}
+```
+
+### Adding a lock
+Now, we must make sure that concurrent accesses on the State are made safe.
+Terraform can use an *AWS Dynamo DB* to lock access to the remote State file (see [S3 bakend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html)).
+
+The pre-configured AWS S3 bucket includes a *AWS Dynamo DB* with a table `tfstate-lock` dedicated to lock Terraform states.
+Therefore, adding the name of this table in your `backend.tfvars` file is sufficient to protect your State from concurrent access.
+```HCL
+dynamodb_table = "tfstate-lock"
+```
+
+### Migrating the state
+
+Finally, we can migrate our local state using the following Terraform command
+```
+terraform init --backend-config="backend.tfvars"
+```
+You will be asked if you want to copy your local State to the remote storage. Answer, `yes`.
+
+The same exact procedure can be used to initialize a Terraform configuration for the first time.
+
+### Troubleshooting
+<details>
+  <summary>Having some issues? Click here for the solution.</summary>
+
+Recipe backend block:
+```HCL
+terraform {
+    required_providers {
+        aws = {
+            source  = "hashicorp/aws"
+            version = "~> 3.0"
+        }
+    }
+    backend "s3" {
+        acl     = "private"
+        encrypt = true
+    }
+}
+```
+
+`backend.tfvars` content:
+```HCL
+region         = "eu-west-1"
+profile        = "kleis-sandbox"
+role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+bucket         = "tfstate-kleis-organization"
+key            = "kleis-sandbox/training/stage-4/YOUR_USERNAME/terraform.tfstate"
+kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
+dynamodb_table = "tfstate-lock"
+```
+Don't forget to update the `key` attribute with your username.
+
+</details>
+
+
