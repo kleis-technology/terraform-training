@@ -5,6 +5,11 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  backend "s3" {
+    acl     = "private"
+    encrypt = true
+  }
 }
 
 provider "aws" {
