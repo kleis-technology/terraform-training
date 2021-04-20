@@ -148,7 +148,7 @@ We suggest you to create a `variables.tf` (*good practices!*) and add a variable
 * `subnet_id`
 * `vpc_security_group_ids`
 
-You might also want to consider how these variables will be provided to Terraform.
+You might also want to consider how these variables will be provided to Terraform:
 * Environment variables?
 * Command line?
 * *tfvars* files?
@@ -178,7 +178,21 @@ variable "vpc_security_groups" {
 
 
 ```
-2. You could create a `config.auto.tfvars` file. This solution remains unsatisfying though. We will see tomorrow how to solve this issue.
+2. Update your `aws_instance` resource to use these variables
+```HCL
+resource "aws_instance" "vm" {
+  ami = data.aws_ami.debian_buster.id
+  instance_type = "t2.nano"
+  key_name = var.ssh_key_name
+  subnet_id = var.subnet
+  vpc_security_group_ids = var.vpc_security_groups
+  associate_public_ip_address = true
+  tags = {
+    Name = "kleis-training-vm"
+  }
+}
+``` 
+3. You could create a `config.auto.tfvars` file. This solution remains unsatisfying though. We will see tomorrow how to solve this issue.
 
 </details>
 
@@ -199,6 +213,7 @@ We suggest you to create a `outputs.tf` (*good practices!*) and add an output fo
 output "debian_ami_id" { 
   value = data.aws_ami.debian_buster.id
 }
+
 output "vm_ip" {
   value = aws_instance.vm.public_ip
 }
@@ -212,9 +227,102 @@ Plan, and apply your improved configuration. Use `terraform output` to retrieve 
 *Did that last `apply` resulted in resource deletion and creation, or was it mostly in-place?*
 
 
-## Serving a webpage from your instance
+## Serving a webpage from your VM
+
+Why we could be tempted to configure our VM using our working ssh connection... 
+It would definitely be against the guiding principles of Infrastructure as Code!
+
+Including the configuration of our VM in our Terraform recipe will solve this issue.
+This can be achieved by 
+1. Importing a configuration file, or configuration template in the Terraform recipe.
+2. Providing the content of said file, or instantiated template, to our VM.
+
+### Importing a configuration file
+
+Locate the `user-data.sh` script available in the `script` folder.
+This script simply creates a phony html page and serves it using a `python3` http server (*spoiler: we do not advocate for this approach in practice*).
+
+Note that it contains two *uninitialized variables* (i.e., `${server_name}` and `${server_port}`).
+
+#### Reading a file
+
+Files can be read using the `file` [function](https://www.terraform.io/docs/language/functions/index.html).
+The outcome of Terraform functions and expressions can be visualized using the `terraform console` command.
+
+Try typing the following commands in your terminal.
+```bash
+> terraform console
+> file("script/user-data.sh") 
+````
+
+#### Instantiating a template file
+
+Declare a [`template_file` data source](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) and the `file` function to load and parametrize the `user-data.sh`.
+1. Set the `${server_port}` variable to `8000`.
+2. Give a name to your server (i.e., `${server_name}`). Use a random pet name to add some flavor!
+   * *Hint: Under which occasion will the random pet name change?*
+3. Provide the [rendered template](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file#rendered) to your VM using [the `aws_instance.user_data` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/instance#user_data).
+4. Access your `index.html` webpage using the public IP of your VM.
+
+
+#### Solution
+
+<details>
+  <summary>Click here to see</summary>
+
+1. Expected changes in `main.tf`:
+```HCL
+resource "random_pet" "pet_name" {
+   keepers = {
+      # Generate a new pet name each time we switch to a new AMI id
+      ami_id = data.aws_ami.debian_buster.id
+   }
+}
+
+data "template_file" "user_data" {
+   template = file("user-data.sh")
+
+   vars = {
+      server_name = random_pet.pet_name.id
+      server_port = var.server_port
+   }
+}
+
+resource "aws_instance" "vm" {
+   ami                         = data.aws_ami.debian_buster.id
+   instance_type               = "t2.nano"
+   key_name                    = var.ssh_key_name
+   subnet_id                   = var.subnet
+   vpc_security_group_ids      = var.vpc_security_groups
+   associate_public_ip_address = true
+   user_data                   = data.template_file.user_data.rendered # Add me!
+   tags = {
+      Name = "kleis-training-vm"
+   }
+}
+```
+2. Expected changes in `variables.tf`:
+```HCL
+variable "server_port" {
+  type = number
+  description = "VM port listening for TCP connections."
+  default = 8000
+}
+
+
+```
+2. Plan, and apply your configuration.
+3. Retrieve the `public_ip` of your VM and access the `<public_ip>:8000` address in a navigator.
+
+</details>
+
+## Leads for further exploration
 
 TODO
+* Updating the script?
+* DNS?
+* Load balancing? Multiple instance?
+* Providing port variable?
 
 ## Troubleshooting
 You can look for the solution of this practical in `tutorials/solutions/stage-2/`.
