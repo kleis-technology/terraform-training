@@ -1,6 +1,6 @@
 # Introduction to Terraform configurations
 
-In this second practical, we will see how to define a Terraform configuration and explore the Terraform state.
+In this practical, we will see how to define a Terraform configuration and explore the Terraform state.
 
 ### Goal
 

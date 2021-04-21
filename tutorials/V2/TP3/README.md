@@ -1,6 +1,6 @@
 # Using Resources, Data Sources, Variables & outputs
 
-In this third practical, we will improve the previous recipe with additional Terraform blocks.
+In this practical, we will improve the previous recipe with additional Terraform blocks.
 
 ### Goal
 
@@ -11,12 +11,31 @@ In a second step, we will update this instance to serve a simple web page.
 
 ### Context
 
+We restart from the recipe built in the previous practical.
+
 A basic AWS infrastructure is provided to you for this practical. It includes
 * A virtual network (Amazon Virtual Private Cloud - VPC)
 * A security policy for this network that allows entering ssh connections and tcp connections (on port 8000).
 * An AWS iam access key and key-pair associated to your username
 
-You will start from your previous recipe.
+#### Setting/resetting recipe
+<details>
+  <summary>Click here if you need to init/reset your configuration.</summary>
+
+1. Destroy your previous terraform configuration if you had one
+```bash
+terraform destroy
+```
+2. Copy the content of `tutorials/V2/solutions/TP2/` in your working directory and apply the configuration.
+```bash
+# if not done previously
+terraform init 
+# Use your key name
+terraform plan -out terraform.tfplan
+# if ok, apply (replace YOUR_KEY_NAME)
+terraform apply terraform.tfplan
+```
+</details>
 
 ## Removing the bucket
 
@@ -318,11 +337,8 @@ variable "server_port" {
 
 ## Leads for further exploration
 
-TODO
-* Updating the script?
-* DNS?
-* Load balancing? Multiple instance?
-* Providing port variable?
+* How would you test if your VM is working properly after provisioning?
+* Could that be automated in some way?
 
 ## Troubleshooting
 You can look for the solution of this practical in `tutorials/solutions/stage-2/`.

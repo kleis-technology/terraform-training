@@ -1,6 +1,6 @@
 # Introduction to Terraform CLI
 
-In this first practical, we will see how to interact with the Terraform commandline client.
+In this practical, we will set up your environment and see how to interact with the Terraform commandline client.
 
 ## Setting up your environment
 
