@@ -50,7 +50,7 @@ module "cluster" {
   source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
-  cluster_name           = random_pet.cluster.id
+  cluster_name = random_pet.cluster.id
 
   # Network arguments
   vpc_id                 = data.terraform_remote_state.training.outputs.vpc_id
@@ -58,14 +58,14 @@ module "cluster" {
   vpc_security_group_ids = [data.terraform_remote_state.training.outputs.vm_security_group_id]
 
   # Instance arguments
-  ssh_key_name           = var.ssh_key_name
-  ami_id                 = module.webapp.ami_id
-  server_port            = var.server_port
-  instance_type          = "t2.nano"
-  rendered_user_data     = module.webapp.rendered_user_data
+  ssh_key_name       = var.ssh_key_name
+  ami_id             = module.webapp.ami_id
+  server_port        = var.server_port
+  instance_type      = "t2.nano"
+  rendered_user_data = module.webapp.rendered_user_data
 
   # Autoscaling group arguments
-  min_instance           = 2
-  max_instance           = 4
-  instance_warmup        = 15 # Making refresh faster
+  min_instance    = 2
+  max_instance    = 4
+  instance_warmup = 15 # Making refresh faster
 }
