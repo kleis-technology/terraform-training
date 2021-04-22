@@ -110,7 +110,7 @@ Applying the previous configuration will result in an error (*try it!*).
 Add the following arguments to your `aws_instance`:
 ```HCL
     # The subnet in the VPC configured for the kleis-sandbox account
-    subnet_id = "subnet-0c314077feda5aaf9"
+    subnet_id = "subnet-0f496149517fb7839"
     # The security group associated with your account
     vpc_security_group_ids = [ "sg-0a1eb414e2846d207" ]
 ```
@@ -137,7 +137,7 @@ resource "aws_instance" "vm" {
     ami = data.aws_ami.debian_buster.id
     instance_type = "t2.nano"
     key_name = ... # YOUR KEY NAME
-    subnet_id = "subnet-0c314077feda5aaf9"
+    subnet_id = "subnet-0f496149517fb7839"
     vpc_security_group_ids = [ "sg-0a1eb414e2846d207" ]
     associate_public_ip_address = true
    tags = {

@@ -29,11 +29,11 @@ variable "ssh_key_name" {
 }
 
 resource "aws_instance" "vm" {
-  ami = data.aws_ami.debian-buster.id
-  instance_type = "t2.nano"
-  key_name = var.ssh_key_name
-  subnet_id = "subnet-0b0903836b0df7fd5"
-  vpc_security_group_ids = [ "sg-0f7591881a7566b35" ]
+  ami                         = data.aws_ami.debian-buster.id
+  instance_type               = "t2.nano"
+  key_name                    = var.ssh_key_name
+  subnet_id                   = "subnet-0b0903836b0df7fd5"
+  vpc_security_group_ids      = ["sg-0f7591881a7566b35"]
   associate_public_ip_address = true
   tags = {
     Name = "stage-2-vm"

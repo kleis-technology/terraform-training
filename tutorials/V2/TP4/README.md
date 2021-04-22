@@ -301,11 +301,30 @@ From your working directory, call it as follows
 ```
 This command will generate a list of changes and reformat your files.
 
+## Bonus: Visualizing the Terraform Dependency Graph
+
+You can export the dependency graph of your current configuration using [the `terraform graph` command](https://www.terraform.io/docs/cli/commands/graph.html).
+
+For instance, you can directly generate the graph in DOT format corresponding to your configuration by typing
+```bash
+# Assuming that you are in your working directory
+> terraform graph
+# Will output the graph in DOT format
+```
+
+If you have GraphViz installed on your computer, you can generate a `svg` by typing
+```bash
+> terraform graph | dot -Tsvg > graph.svg
+```
+
+Otherwise, just copy the output of the `terraform graph` command and paste in any only GraphViz website (e.g., [this one](https://dreampuf.github.io/GraphvizOnline)).
+Or alternatively, try installing some external tool (e.g., [terraform-graph-beautifier](https://github.com/pcasteran/terraform-graph-beautifier)) .
+
 ## Leads for further exploration
 
 * Think about which other arguments could benefit from this approach.
 * Try to reconnect what we have seen until now with the *Infrastructure as Code guiding principles*.
-   * Can you think of any missing *tool* that would help you follow these principles?
+   * Can you think of any missing *tool* or Terraform *object* that would help you follow these principles?
 
 ## Troubleshooting
 You can look for the solution of this practical in `tutorials/V2/solutions/TP4`.
