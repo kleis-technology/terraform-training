@@ -19,7 +19,7 @@ We restart from the recipe built in the previous practical.
 ```bash
 terraform destroy
 ```
-2. Copy the content of `tutorials/V2/solutions/TP3/SecondPhase` in your working directory and apply the configuration.
+2. Copy the content of `tutorials/V2/solutions/TP3/2_with_http` in your working directory and apply the configuration.
 ```bash
 # if not done previously
 terraform init 
