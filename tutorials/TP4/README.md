@@ -19,7 +19,7 @@ We restart from the recipe built in the previous practical.
 ```bash
 terraform destroy
 ```
-2. Copy the content of `tutorials/V2/solutions/TP3/2_with_http` in your working directory and apply the configuration.
+2. Copy the content of `tutorial/solutions/TP3/2_with_http` in your working directory and apply the configuration.
 ```bash
 # if not done previously
 terraform init 
@@ -327,7 +327,7 @@ Or alternatively, try installing some external tool (e.g., [terraform-graph-beau
    * Can you think of any missing *tool* or Terraform *object* that would help you follow these principles?
 
 ## Troubleshooting
-You can look for the solution of this practical in `tutorials/V2/solutions/TP4`.
+You can look for the solution of this practical in `tutorials/solutions/TP4`.
 
 
 

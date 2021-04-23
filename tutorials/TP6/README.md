@@ -20,7 +20,7 @@ We restart from the recipe built in the previous practical.
 ```bash
 terraform destroy
 ```
-2. Copy the content of `tutorials/V2/solutions/TP5/4_using_both_modules` in your working directory and apply the configuration.
+2. Copy the content of `tutorial/solutions/TP5/4_using_both_modules` in your working directory and apply the configuration.
 ```bash
 # if not done previously
 terraform init 
@@ -80,6 +80,6 @@ Starting from a recipe with a single instance.
     * *Tips: Each provider documentation defines how to import resources (e.g., [aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#import)).*
 
 ## Solution
-You can look for a possible solution for the multiple environments setting in `tutorials/V2/solutions/TP6`. 
+You can look for a possible solution for the multiple environments setting in `tutorials/solutions/TP6`. 
 
 

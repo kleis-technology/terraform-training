@@ -19,7 +19,7 @@ We restart from the recipe built in the previous practical.
 ```bash
 terraform destroy
 ```
-2. Copy the content of `tutorials/V2/solutions/TP4` in your working directory and apply the configuration.
+2. Copy the content of `tutorial/solutions/TP4` in your working directory and apply the configuration.
 ```bash
 # if not done previously
 terraform init 
@@ -387,4 +387,4 @@ To upgrade your modules
 * Browse the Terraform registry for modules that could be useful to your projects
 
 ## Troubleshooting
-You can look for the solution of this practical in `tutorials/V2/solutions/TP5`.
+You can look for the solution of this practical in `tutorials/solutions/TP5`.

@@ -26,7 +26,7 @@ A basic AWS infrastructure is provided to you for this practical. It includes
 ```bash
 terraform destroy
 ```
-2. Copy the content of `tutorials/V2/solutions/TP2/` in your working directory and apply the configuration.
+2. Copy the content of `tutorial/solutions/TP2/` in your working directory and apply the configuration.
 ```bash
 # if not done previously
 terraform init 
@@ -341,4 +341,4 @@ variable "server_port" {
 * Could that be automated in some way?
 
 ## Troubleshooting
-You can look for the solution of this practical in `tutorials/solutions/stage-2/`.
+You can look for the solution of this practical in `tutorials/solutions/TP3/`.
