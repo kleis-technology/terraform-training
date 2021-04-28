@@ -9,7 +9,7 @@ In this practical, we will see how to set up a remote state storage and use exte
 
 ### Context
 
-We restart from the recipe built in the previous practical.
+Restart from the recipe built in the previous practical.
 
 #### Setting/resetting recipe
 <details>
@@ -63,14 +63,14 @@ terraform state show <RESOURCE_ADDRESS>
 
 We are about to migrate the state remotely using the backend of our choice.
 * What are the advantages of doing so?
-* What should we be careful of?
+* What should you be careful of?
 
 ### Backend configuration
 
-Telling Terraform that we want to use a specific state backend is a two steps process.
+Configuring Terraform to use a specific state backend is a two steps process.
 
 
-First, we must provide to Terraform the backend configuration. 
+First, you must provide to Terraform the backend configuration. 
 This configuration can be passed either as arguments, e.g.,
 ```bash
 terraform init
@@ -93,7 +93,7 @@ terraform {
    }
 ```
 
-For this practical, we will use a preconfigured S3 bucket as backend.
+For this practical, you will use a preconfigured S3 bucket as backend.
 
 Have a quick look at the [S3 backend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html) documentation.
 
@@ -107,7 +107,7 @@ role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-san
 bucket         = "tfstate-kleis-organization"
 key            = "kleis-sandbox/training/remote_state/YOUR_USERNAME/terraform.tfstate"
 ```
-These attributes inform Terraform on the location of the S3 bucket (*region* and *bucket*), your State path (*key*) and the credientials and role to assume (*profile* and *role_arn*).
+These attributes inform Terraform on the location of the S3 bucket (*region* and *bucket*), your State path (*key*) and the credentials and role to assume (*profile* and *role_arn*).
 
 Make sure to replace `MY_USERNAME` in the `key` attribute with your username.
 
@@ -160,7 +160,7 @@ terraform {
 ```
 
 ### Adding a lock
-Now, we must make sure that concurrent accesses on the State are made safely.
+Now, you will make sure that concurrent accesses on the State are made safely.
 
 At this end, Terraform can use an *AWS Dynamo DB* to lock the access to the remote State file (see [S3 backend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html)).
 
@@ -172,7 +172,7 @@ dynamodb_table = "tfstate-lock"
 
 ### Migrating the state
 
-Finally, we can migrate our local state using the following Terraform command
+Finally, migrate the local state using the following Terraform command
 ```
 terraform init --backend-config="backend.tfvars"
 ```
@@ -217,7 +217,7 @@ Our current recipe includes *indirect* references to an infrastructure provision
 
 The state in question is therefore located on the `tfstate-kleis-organization` bucket at the following location `kleis-sandbox/training/terraform.tfstate`.
 
-Instead of using *indirect* references, that is using variables for the network configuration, or even worse hardcoded string, we will now use explicit references to the other Terraform configuration.
+Instead of using *indirect* references, that is using variables for the network configuration, or even worse hardcoded string, you will use explicit references to the other Terraform configuration.
 
 *Can you figure out what are the advantages of doing so?*
 
@@ -255,7 +255,7 @@ output "vm_security_group_id" {
 }
 ```
 
-These `outputs` can now be referenced in our recipe by prefixing them by: `data.terraform_remote_state.training.outputs`.
+These `outputs` can now be referenced in the recipe by prefixing them by: `data.terraform_remote_state.training.outputs`.
 For instance, the `subnet_id` can be referred as `data.terraform_remote_state.training.outputs.subnet_id`.
 
 
@@ -323,7 +323,7 @@ Or alternatively, try installing some external tool (e.g., [terraform-graph-beau
 ## Leads for further exploration
 
 * Think about which other arguments could benefit from this approach.
-* Try to reconnect what we have seen until now with the *Infrastructure as Code guiding principles*.
+* Try to link what we have seen until now with the *Infrastructure as Code guiding principles*.
    * Can you think of any missing *tool* or Terraform *object* that would help you follow these principles?
 
 ## Troubleshooting

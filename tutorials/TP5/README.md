@@ -9,7 +9,7 @@ In this practical, we will see how to use meta-arguments to create multiple reso
 
 ### Context
 
-We restart from the recipe built in the previous practical.
+Restart from the recipe built in the previous practical.
 
 #### Setting/resetting recipe
 <details>
@@ -108,7 +108,7 @@ output "vm_ip" {
 
 In this scenario, you will create multiple virtual machines with different configurations.
 
-Let's assume that our configuration script has different behaviors in function of its assigned virtual machine name.
+Let's assume that the configuration script has different behaviors in function of its assigned virtual machine name.
 The machine names would be provided as input variables, e.g.,
 ```hcl
 variable "cattle_names" {
@@ -177,21 +177,21 @@ output "vm_ips" {
 
 Terraform modules make it easier to organize, reuse, share and import Infrastructure as Code.
 
-In this exercise, we will use two example modules.
+In this exercise, you will use two example modules.
 These modules are put at your disposal [on a Git repository](https://github.com/meyerx/terraform-example-modules).
 
 This Git repository contains the modules
 * `webapp` in folder `modules/webapp`
 * `cluster` in folder `modules/cluster`
 
-We will start by using the `v0.1.0` version of these modules that provides
+Start by using the `v0.1.0` version of these modules that provides
 * A simple `webapp` *configuration*: that is, an AMI and a rendered configuration script.
 * A simple functional `cluster`.
 
-### Using a module to replace our single AWS Instance by a cluster
+### Using a module to replace a single AWS Instance by a cluster
  
-In this scenario, we are ready to put our "web application" in production. 
-We expect the load to vary across time. We therefore want to migrate our webapp on an autoscaling cluster with a load balancer.
+In this scenario, you will put the "web application" in production. 
+Here, the load is expected to vary across time. The webapp is therefore migrated on an autoscaling cluster with a load balancer.
 Provisioning an [AWS autoscaling group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) with an [application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) requires a considerable effort.
 
 The `cluster` module will allow doing that without the hassle of setting up everything ourselves.
@@ -205,7 +205,7 @@ module "cluster" {
   # No arguments for now
 }
 ```
-This simply declares that we want to use the module `cluster`
+This simply declares to use the module `cluster`.
 * From the github repository `meyerx/terraform-example-modules.git`
 * Located in the `//modules/cluster`
 * With version `?ref=v0.1.0` (i.e., Git tag in this case) 
@@ -292,9 +292,9 @@ Plan and apply your recipe.
   
 ### Replacing the image configuration by an external module
 
-We will now replace the configuration of our instances using the `webapp` module.
+You will now replace the configuration of the instances using the `webapp` module.
 
-Follow the same procedure we use for the `cluster` module.
+Follow the same procedure used for the `cluster` module.
 1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
       > github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
 2. Configure the module `webapp`.
@@ -354,7 +354,7 @@ module "cluster" {
 
 ### Upgrading your modules
 
-We will now upgrade your modules to version `v0.2.0`.
+You will now upgrade your modules to version `v0.2.0`.
 * The `webapp` module now return a webpage with 
   * The random pet name from terraform
   * A random pet name generated during the instance initialisation

@@ -4,14 +4,14 @@ In this practical, we will improve the previous recipe with additional Terraform
 
 ### Goal
 
-We will build a Terraform configuration to instantiate a Debian Booster virtual machine.
+You will build a Terraform configuration to instantiate a Debian Booster virtual machine.
 The default behavior of this instance will be to allow SSH connections authenticated with your ssh key.
-In a second step, we will update this instance to serve a simple web page.
+In a second step, you will update this instance to serve a simple web page.
 
 
 ### Context
 
-We restart from the recipe built in the previous practical.
+Restart from the recipe built in the previous practical.
 
 A basic AWS infrastructure is provided to you for this practical. It includes
 * A virtual network (Amazon Virtual Private Cloud - VPC)
@@ -61,20 +61,20 @@ resource "aws_s3_bucket" "bucket" {
 ## Declaring an AWS Instance
 
 Declaring an AWS instance will require several steps.
-1. Finding the ID of the Amazon Machine Image (AMI) that we want to instantiate on our virtual machine.
+1. Finding the ID of the Amazon Machine Image (AMI) that we want to instantiate on the virtual machine.
 2. Declaring an AWS instance resource
 3. Declaring the `variables`.
 4. Declaring the `outputs`
 
 ### Finding the AMI ID
 
-We will use a data source to query the AMI from the aws catalog: the [aws_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) data source.
+You will use a data source to query the AMI from the aws catalog: the [aws_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) data source.
 
-We want to retrieve the latest debian buster (debian 10) image from the official debian aws account.
+Retrieve the latest debian buster (debian 10) image from the official debian aws account.
 The debian AWS owner ID can be found on the following [debian webpage](https://wiki.debian.org/Cloud/AmazonEC2Image/Buster),
 >  AWS account ID = 136693071363.
 
-We can then use this ID to query the latest debian buster image, using a data block, as follows
+Use this ID to query the latest debian buster image, using a data block, as follows
 ```HCL
 data "aws_ami" "debian_buster" { 
     owners = [ "136693071363" ]
@@ -83,13 +83,13 @@ data "aws_ami" "debian_buster" {
 }
 ```
 
-This block will provide the `data.aws_ami.debian_buster.id` attribute that returns the AMI id matching our request. 
+This block will provide the `data.aws_ami.debian_buster.id` attribute that returns the AMI id matching the request. 
 
 ### Declaring the AWS Instance
 
-Now that we have determined the debian buster AMI id, we will declare our AWS Instance.
+Now that you have determined the debian buster AMI id, you will declare an AWS Instance.
 
-For that matter, we will use the [aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) resource.
+For that matter, use the [aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) resource.
 ```HCL
 resource "aws_instance" "vm" {
     ami = data.aws_ami.debian_buster.id
@@ -99,8 +99,7 @@ resource "aws_instance" "vm" {
     }
 }
 ```
-The arguments provided to the `aws_instance` declares that we want to instantiate one `debian_buster` AMI on a Amazon EC2 `t2.nano` instance ([more info](https://aws.amazon.com/ec2/instance-types/t2/)). 
-We also associate a AWS tag to this resource.
+The arguments provided to the `aws_instance` declares that one `debian_buster` AMI is instantiated on an Amazon EC2 `t2.nano` instance ([more info](https://aws.amazon.com/ec2/instance-types/t2/)).
 
 #### What is missing?
 
@@ -162,7 +161,7 @@ For instance, consider:
 
 Try to decide which variables could be convenient to have as input.
 
-We suggest you to create a `variables.tf` (*good practices!*) and add a variable for the following arguments
+Create a `variables.tf` (*good practices!*) and add a variable for the following arguments
 * `key_name`
 * `subnet_id`
 * `vpc_security_group_ids`
@@ -211,7 +210,7 @@ resource "aws_instance" "vm" {
   }
 }
 ``` 
-3. You could create a `config.auto.tfvars` file. This solution remains unsatisfying though. We will see tomorrow how to solve this issue.
+3. You could create a `config.auto.tfvars` file. This solution remains unsatisfying though. You will see tomorrow how to solve this issue.
 
 </details>
 
@@ -219,7 +218,7 @@ resource "aws_instance" "vm" {
 
 Try to decide which outputs could be convenient to have access with `terraform output`.
 
-We suggest you to create a `outputs.tf` (*good practices!*) and add an output for the following attributes
+Create a `outputs.tf` (*good practices!*) and add an output for the following attributes
 * The ID of the `debian_buster` AMI.
 * The public IP of your `vm`.
 
@@ -248,13 +247,13 @@ Plan, and apply your improved configuration. Use `terraform output` to retrieve 
 
 ## Serving a webpage from your VM
 
-Why we could be tempted to configure our VM using our working ssh connection... 
+Why you could be tempted to configure the VM using the working ssh connection... 
 It would definitely be against the guiding principles of Infrastructure as Code!
 
-Including the configuration of our VM in our Terraform recipe will solve this issue.
+Including the configuration of the VM in the Terraform recipe will solve this issue.
 This can be achieved by 
 1. Importing a configuration file, or configuration template in the Terraform recipe.
-2. Providing the content of said file, or instantiated template, to our VM.
+2. Providing the content of said file, or instantiated template, to the VM.
 
 ### Importing a configuration file
 
@@ -293,7 +292,7 @@ Declare a [`template_file` data source](https://registry.terraform.io/providers/
 ```HCL
 resource "random_pet" "pet_name" {
    keepers = {
-      # Generate a new pet name each time we switch to a new AMI id
+      # Generate a new pet name each time a new AMI id is used
       ami_id = data.aws_ami.debian_buster.id
    }
 }

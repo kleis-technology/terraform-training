@@ -10,7 +10,7 @@ In this last practical, we will see how to create your own module and use it to 
 
 ### Context
 
-We restart from the recipe built in the previous practical.
+Restart from the recipe built in the previous practical.
 
 #### Setting/resetting recipe
 <details>
@@ -35,7 +35,7 @@ terraform apply terraform.tfplan
 
 Congratulations, you have reached the last practical! 
 
-In this practical, we will ask you to
+In this practical, you are asked to
 1. Adapt the current recipe to allow for a parametrization of the amount of resources provisioned, e.g.,
     * A single instance without autoscaling group and load balancer
     * Varying ranges of instances for the autoscaling group

@@ -4,12 +4,12 @@ In this practical, we will see how to define a Terraform configuration and explo
 
 ### Goal
 
-We will build a basic Terraform configuration and inspect the terraform state resulting from its deployment.
-We will then explore the Terraform state after provisioning.
+You will build a basic Terraform configuration and inspect the terraform state resulting from its deployment.
+You will then explore the Terraform state after provisioning.
 
 ### Context
 
-You will start this practical from the previous configuration (i.e., `stage-1.tf`).
+Start this practical from the previous configuration (i.e., `stage-1.tf`).
 
 ## Understanding the previous configuration
 
@@ -45,7 +45,7 @@ provider "aws" {
 
 ### S3 Bucket
 
-To create an infrastructure, we need at least one resource. 
+To create an infrastructure, you need at least one resource. 
 The following resource block declare an AWS S3 bucket (i.e., a container stored in Amazon S3).
 
 ```HCL
@@ -92,8 +92,9 @@ less terraform.tfstate
     
 ## Importing and using an additional provider
 
-We will now change this configuration to use a random name in place of the current prefix for the S3 Bucket.
-First, we will import the provider Random, and then we will alter our S3 bucket resource.
+You will now change this configuration to use a random name in place of the current prefix for the S3 Bucket.
+
+First, you will import the provider Random, and then alter the S3 bucket resource.
 
 ### Importing a provider
 
