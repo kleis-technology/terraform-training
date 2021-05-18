@@ -13,4 +13,3 @@ variable "server_port" {
   description = "VM port listening for TCP connections."
   default     = 8000
 }
-

@@ -51,4 +51,3 @@ variable "max_instance" {
   description = "Maximum number of instances in the cluster."
   type        = number
 }
-

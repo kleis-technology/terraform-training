@@ -1,9 +1,9 @@
-test :
+test:
   min_instance: 1
   max_instance: 1
-stage :
+stage:
   min_instance: 2
   max_instance: 4
-prod :
+prod:
   min_instance: 2
   max_instance: 8

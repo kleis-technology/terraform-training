@@ -59,4 +59,3 @@ resource "aws_instance" "webserver" {
     Name = "kleis-${var.environment_name}-vm"
   }
 }
-

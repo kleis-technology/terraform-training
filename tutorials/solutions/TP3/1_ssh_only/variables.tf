@@ -12,4 +12,3 @@ variable "vpc_security_groups" {
   type        = string
   description = "ID(s) of the security groups associated with the VPC."
 }
-
