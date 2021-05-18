@@ -62,7 +62,7 @@ resource "random_pet" "cluster" {
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id

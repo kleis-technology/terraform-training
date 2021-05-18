@@ -201,7 +201,7 @@ The `cluster` module will allow doing that without the hassle of setting up ever
 First, add the module into your recipe as follows
 ```hcl
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
   # No arguments for now
 }
 ```
@@ -232,7 +232,7 @@ and defines that
 
 ```hcl
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -296,7 +296,7 @@ You will now replace the configuration of the instances using the `webapp` modul
 
 Follow the same procedure used for the `cluster` module.
 1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
-      > github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
+   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
 2. Configure the module `webapp`.
 3. Remove the `random_pet`, `aws_ami` and `template_file` resources.
 4. Plan, and when ready, apply.
@@ -318,13 +318,13 @@ Follow the same procedure used for the `cluster` module.
 ```HCL
 
 module "webapp" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
 
   server_port = var.server_port
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
@@ -363,18 +363,20 @@ You will now upgrade your modules to version `v0.2.0`.
 To upgrade your modules
 1. Replace in both module sources the tag `v0.1.0` by `v0.2.0`
 2. Add the new argument `instance_warmup` to the `cluster` module, i.e.,
-    ```HCL
-    module "cluster" {
-      source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
-    
-      ... # Other arguments
-      
-      # Autoscaling group arguments
-      min_instance    = 2
-      max_instance    = 4
-      instance_warmup = 15 # Making instance refreshes faster
-    }
-    ```
+
+   ```HCL
+   module "cluster" {
+     source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
+
+     ... # Other arguments
+
+     # Autoscaling group arguments
+     min_instance    = 2
+     max_instance    = 4
+     instance_warmup = 15 # Making instance refreshes faster
+   }
+   ```
+
 3. Init, plan and apply your recipe.
 4. Check what is happening over the next 2-3 minutes on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:). 
    * What happens if you access and refresh your webpage now? 

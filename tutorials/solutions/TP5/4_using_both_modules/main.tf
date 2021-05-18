@@ -37,7 +37,7 @@ data "terraform_remote_state" "training" {
 }
 
 module "webapp" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
 
   server_port = var.server_port
 }
@@ -47,7 +47,7 @@ resource "random_pet" "cluster" {
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
