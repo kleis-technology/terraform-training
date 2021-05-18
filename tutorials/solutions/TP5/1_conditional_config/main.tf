@@ -39,7 +39,6 @@ data "template_file" "user_data" {
 
   vars = {
     server_name = random_pet.pet_name.id
-    server_port = var.server_port
   }
 }
 

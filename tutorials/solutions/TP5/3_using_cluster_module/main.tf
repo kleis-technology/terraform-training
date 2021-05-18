@@ -39,7 +39,6 @@ data "template_file" "user_data" {
 
   vars = {
     server_name = random_pet.vm.id
-    server_port = var.server_port
   }
 }
 
@@ -75,7 +74,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = data.aws_ami.debian_buster.id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = data.template_file.user_data.rendered
 

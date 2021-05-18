@@ -35,12 +35,6 @@ variable "ssh_key_name" {
   type        = string
 }
 
-variable "server_port" {
-  description = "VM port listening for TCP connections."
-  type        = number
-  default     = 8000
-}
-
 # Cluster inputs
 variable "min_instance" {
   description = "Minimum number of instances in the cluster."

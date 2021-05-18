@@ -153,7 +153,6 @@ data "template_file" "webservers" {
 
   vars = {
     server_name = each.key
-    server_port = var.server_port
   }
 }
 
@@ -265,7 +264,6 @@ module "cluster" {
   ## Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = data.aws_ami.debian_buster.id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = data.template_file.user_data.rendered
 
@@ -327,7 +325,7 @@ Follow the same procedure used for the `cluster` module.
    - Validate this observation using the following shell commands
      ```bash
      > LB_URL="..." # Plug your load balancer URL
-     > WEBSERVER_PORT="..." # Plug the port you used for your webserver
+     > WEBSERVER_PORT="80"
      > clear; for i in $(seq 1 10000); do tput cup 0 0; curl "${LB_URL}:${WEBSERVER_PORT}"; sleep 0.1; done;
      ```
    - Again, does the name change? Why?
@@ -343,8 +341,6 @@ Follow the same procedure used for the `cluster` module.
 
 module "webapp" {
   source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
-
-  server_port = var.server_port
 }
 
 module "cluster" {
@@ -361,7 +357,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = module.webapp.ami_id # Change me
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = module.webapp.rendered_user_data  # Change me
 
@@ -391,11 +386,7 @@ To upgrade your modules
 
    ```HCL
    module "cluster" {
-<<<<<<< HEAD
      source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
-=======
-     source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
->>>>>>> 15f05b5 (linting)
 
      ... # Other arguments
 

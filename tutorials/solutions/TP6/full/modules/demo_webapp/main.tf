@@ -15,8 +15,6 @@ terraform {
 
 module "webapp" {
   source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
-
-  server_port = var.server_port
 }
 
 module "cluster" {
@@ -36,7 +34,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = module.webapp.ami_id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = module.webapp.rendered_user_data
 

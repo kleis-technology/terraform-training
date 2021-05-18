@@ -290,7 +290,7 @@ This can be achieved by
 Locate the `user-data.sh` script available in the `script` folder.
 This script simply creates a phony html page and serves it using a `python3` http server (_spoiler: we do not advocate for this approach in practice_).
 
-Note that it contains two _uninitialized variables_ (i.e., `${server_name}` and `${server_port}`).
+Note that it contains two _uninitialized variables_ (i.e. `${server_name}`).
 
 #### Reading a file
 
@@ -308,11 +308,10 @@ Try typing the following commands in your terminal.
 
 Declare a [`template_file` data source](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) and the `file` function to load and parametrize the `user-data.sh`.
 
-1. Set the `${server_port}` variable to `8000`.
-2. Give a name to your server (i.e., `${server_name}`). Use a random pet name to add some flavor!
+1. Give a name to your server (i.e., `${server_name}`). Use a random pet name to add some flavor!
    - _Hint: Under which occasion will the random pet name change?_
-3. Provide the [rendered template](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file#rendered) to your VM using [the `aws_instance.user_data` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/instance#user_data).
-4. Access your `index.html` webpage using the public IP of your VM.
+2. Provide the [rendered template](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file#rendered) to your VM using [the `aws_instance.user_data` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/instance#user_data).
+3. Access your `index.html` webpage using the public IP of your VM.
 
 #### Solution
 
@@ -334,7 +333,6 @@ data "template_file" "user_data" {
 
    vars = {
       server_name = random_pet.pet_name.id
-      server_port = var.server_port
    }
 }
 
@@ -350,18 +348,6 @@ resource "aws_instance" "vm" {
       Name = "kleis-training-vm"
    }
 }
-```
-
-2. Expected changes in `variables.tf`:
-
-```HCL
-variable "server_port" {
-  type = number
-  description = "VM port listening for TCP connections."
-  default = 8000
-}
-
-
 ```
 
 2. Plan, and apply your configuration.
