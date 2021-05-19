@@ -14,7 +14,7 @@ terraform {
 
 
 module "webapp" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
 }
 
 module "cluster" {
