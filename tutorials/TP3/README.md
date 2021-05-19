@@ -1,6 +1,6 @@
 # Using Resources, Data Sources, Variables & outputs
 
-In this practical, we will improve the previous recipe with additional Terraform blocks.
+In this exercise, we will improve the previous recipe with additional Terraform blocks.
 
 ### Goal
 
@@ -10,9 +10,9 @@ In a second step, you will update this instance to serve a simple web page.
 
 ### Context
 
-Restart from the recipe built in the previous practical.
+Restart from the recipe built in the previous exercise.
 
-A basic AWS infrastructure is provided to you for this practical. It includes
+A basic AWS infrastructure is provided to you for this exercise. It includes :
 
 - A virtual network (Amazon Virtual Private Cloud - VPC)
 - A security policy for this network that allows entering ssh connections and tcp connections (on port 8000).
@@ -128,13 +128,13 @@ Applying the previous configuration will result in an error (_try it!_).
     vpc_security_group_ids = [ "sg-0a1eb414e2846d207" ]
 ```
 
-2. More information are missing.
+2. More informations are missing to be able to connect to the VM.
 
    - Will your virtual machine have a dedicated public IP?
-     - _hint_: Look at the [`key_name` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#key_name)
-   - How will you authenticate yourself on the virtual machine? (_hint_ `associate_public_ip_address` argument)
      - _hint_: Look at the [`associate_public_ip_address` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#associate_public_ip_address)
-
+   - How will you authenticate yourself on the virtual machine?
+     - _hint_: Look at the [`key_name` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#key_name)
+     
 3. Update your resource with your `key_name`, and specify whether your want to have an associated public IP.
 4. Plan, and apply your configuration when ready.
 5. Find the IP address of your virtual machine and establish a ssh connection with it.

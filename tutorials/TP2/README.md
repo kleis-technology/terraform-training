@@ -98,8 +98,8 @@ terraform show
 less terraform.tfstate
 ```
 
-3. Answer these questions
-   - What are the difference between those two representations?
+3. Answer those questions
+   - What are the difference between the two previous representations of the state?
    - Can you find your bucket using the [AWS console](https://s3.console.aws.amazon.com/s3/home?region=us-west-1#)?
 
 ## Importing and using an additional provider
