@@ -9,7 +9,7 @@ You will then explore the Terraform state after provisioning.
 
 ### Context
 
-Start this practical from the previous configuration (i.e., `stage-1.tf`).
+Start this practical from the previous configuration (i.e., `main.tf`).
 
 ## Understanding the previous configuration
 
