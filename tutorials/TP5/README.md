@@ -215,7 +215,7 @@ First, add the module into your recipe as follows
 
 ```hcl
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
   # No arguments for now
 }
 ```
@@ -251,7 +251,7 @@ and defines that
 
 ```hcl
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -316,7 +316,7 @@ You will now replace the configuration of the instances using the `webapp` modul
 Follow the same procedure used for the `cluster` module.
 
 1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
-   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
+   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
 2. Configure the module `webapp`.
 3. Remove the `random_pet`, `aws_ami` and `template_file` resources.
 4. Plan, and when ready, apply.
@@ -340,11 +340,11 @@ Follow the same procedure used for the `cluster` module.
 ```HCL
 
 module "webapp" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.1.0"
 }
 
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id

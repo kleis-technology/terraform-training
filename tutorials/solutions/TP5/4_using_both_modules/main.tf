@@ -37,7 +37,7 @@ data "terraform_remote_state" "training" {
 }
 
 module "webapp" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
 }
 
 
