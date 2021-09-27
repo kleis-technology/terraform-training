@@ -353,7 +353,6 @@ Or alternatively, try installing some external tool (e.g., [terraform-graph-beau
 
 ## Leads for further exploration
 
-- Think about which other arguments could benefit from this approach.
 - Try to link what we have seen until now with the _Infrastructure as Code guiding principles_.
   - Can you think of any missing _tool_ or Terraform _object_ that would help you follow these principles?
 

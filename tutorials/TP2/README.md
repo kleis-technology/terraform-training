@@ -43,7 +43,7 @@ provider "aws" {
 ```
 
 2. The second block declare the AWS provider.
-   - What happens if we omit this block?
+   - Try removing the block, and plan.
 
 ### S3 Bucket
 
