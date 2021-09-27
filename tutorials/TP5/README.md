@@ -4,30 +4,35 @@ In this practical, we will see how to use meta-arguments to create multiple reso
 
 ### Goal
 
-* Interact with meta-arguments
-* Import external modules stored on a Git repository
+- Interact with meta-arguments
+- Import external modules stored on a Git repository
 
 ### Context
 
 Restart from the recipe built in the previous practical.
 
 #### Setting/resetting recipe
+
 <details>
   <summary>Click here if you need to init/reset your configuration.</summary>
 
 1. Destroy your previous terraform configuration if you had one
+
 ```bash
 terraform destroy
 ```
+
 2. Copy the content of `tutorial/solutions/TP4` in your working directory and apply the configuration.
+
 ```bash
 # if not done previously
-terraform init 
+terraform init
 # Use your key name
 terraform plan -out terraform.tfplan
 # if ok, apply (replace YOUR_KEY_NAME)
 terraform apply terraform.tfplan
 ```
+
 </details>
 
 ## Using Meta-Arguments
@@ -36,17 +41,18 @@ We will consider different scenarios in which using meta-arguments could prove u
 
 ### Conditional instance configuration
 
-In the first scenario, you will create an *if-else* condition defining the configuration of your virtual machine.
+In the first scenario, you will create an _if-else_ condition defining the configuration of your virtual machine.
 
-The *HashiCorp Language* (HCL) doesn't support *if-else* statements.
+The _HashiCorp Language_ (HCL) doesn't support _if-else_ statements.
 You will have to use an alternative approach create such statement.
 
-* Add a new boolean variable named `with_webpage`.
-  * If `with_webpage` then your instance will only accept ssh connections.
-  * Else the instance will accept ssh connections and serve a webpage.
-* *Hint: think about [the meta-argument `count`](https://www.terraform.io/docs/language/meta-arguments/count.html) and [the ternary operator](https://www.terraform.io/docs/language/expressions/conditionals.html)*.
+- Add a new boolean variable named `with_webpage`.
+  - If `with_webpage` then your instance will only accept ssh connections.
+  - Else the instance will accept ssh connections and serve a webpage.
+- _Hint: think about [the meta-argument `count`](https://www.terraform.io/docs/language/meta-arguments/count.html) and [the ternary operator](https://www.terraform.io/docs/language/expressions/conditionals.html)_.
 
 #### Solution
+
 <details>
   <summary>Click here to see.</summary>
 1. Add an the input variable.
@@ -110,6 +116,7 @@ In this scenario, you will create multiple virtual machines with different confi
 
 Let's assume that the configuration script has different behaviors in function of its assigned virtual machine name.
 The machine names would be provided as input variables, e.g.,
+
 ```hcl
 variable "cattle_names" {
   description = "Cattle names."
@@ -121,12 +128,13 @@ variable "cattle_names" {
   ]
 }
 ```
+
 For each name in the list, a virtual machine will be instantiated.
 Have a look at the `user-data.sh`script provided with this TP to understand how different behavior are enforced.
 
-* Re-use the `template_file` and `aws_instance` resources.
-  * Don't duplicate them.
-  * *Hint: Think about *for-like* statements supported by HCL.*
+- Re-use the `template_file` and `aws_instance` resources.
+  - Don't duplicate them.
+  - *Hint: Think about *for-like* statements supported by HCL.*
 
 #### Solution
 
@@ -135,7 +143,8 @@ Have a look at the `user-data.sh`script provided with this TP to understand how 
   <summary>Click here to see.</summary>
 
 1. Use [a `for_each` meta-argument](https://www.terraform.io/docs/language/meta-arguments/for_each.html), for instance.
-2. Modify your  `template_file` and `aws_instance` resources.
+2. Modify your `template_file` and `aws_instance` resources.
+
 ```hcl
 data "template_file" "webservers" {
   for_each = toset(var.cattle_names)
@@ -144,7 +153,6 @@ data "template_file" "webservers" {
 
   vars = {
     server_name = each.key
-    server_port = var.server_port
   }
 }
 
@@ -163,7 +171,9 @@ resource "aws_instance" "webservers" {
   }
 }
 ```
+
 3. Don't forget to adapt your `vm_ips` outputs.
+
 ```hcl
 output "vm_ips" {
   value = tomap({
@@ -171,6 +181,7 @@ output "vm_ips" {
   })
 }
 ```
+
 </details>
 
 ## Using modules
@@ -181,16 +192,18 @@ In this exercise, you will use two example modules.
 These modules are put at your disposal [on a Git repository](https://github.com/meyerx/terraform-example-modules).
 
 This Git repository contains the modules
-* `webapp` in folder `modules/webapp`
-* `cluster` in folder `modules/cluster`
+
+- `webapp` in folder `modules/webapp`
+- `cluster` in folder `modules/cluster`
 
 Start by using the `v0.1.0` version of these modules that provides
-* A simple `webapp` *configuration*: that is, an AMI and a rendered configuration script.
-* A simple functional `cluster`.
+
+- A simple `webapp` _configuration_: that is, an AMI and a rendered configuration script.
+- A simple functional `cluster`.
 
 ### Using a module to replace a single AWS Instance by a cluster
- 
-In this scenario, you will put the "web application" in production. 
+
+In this scenario, you will put the "web application" in production.
 Here, the load is expected to vary across time. The webapp is therefore migrated on an autoscaling cluster with a load balancer.
 Provisioning an [AWS autoscaling group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) with an [application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) requires a considerable effort.
 
@@ -199,22 +212,27 @@ The `cluster` module will allow doing that without the hassle of setting up ever
 #### 1. Importing the module
 
 First, add the module into your recipe as follows
+
 ```hcl
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
   # No arguments for now
 }
 ```
+
 This simply declares to use the module `cluster`.
-* From the github repository `meyerx/terraform-example-modules.git`
-* Located in the `//modules/cluster`
-* With version `?ref=v0.1.0` (i.e., Git tag in this case) 
+
+- From the github repository `meyerx/terraform-example-modules.git`
+- Located in the `//modules/cluster`
+- With version `?ref=v0.1.0` (i.e., Git tag in this case)
 
 Then, run `terraform init -backend-config="backend.tfvars"`
-  * The module is now downloaded in your `.terraform/` folder.
-  * Locate it and have a look at the `inputs.tf` file.
 
-Finally, run `terraform plan`. *What happens?*
+- The module is now downloaded in your `.terraform/` folder.
+- Locate it and have a look at the `inputs.tf` file.
+
+Finally, run `terraform plan`. _What happens?_
+
 #### 2. Configuring the module
 
 Try configuring the module on your own by reusing values already defined in your recipe.
@@ -223,16 +241,17 @@ Try configuring the module on your own by reusing values already defined in your
  <summary>Click here for a solution.</summary>
 
 This configuration re-use
-* The `terraform_remote_state`
-* The parameters originally given the `aws_instance`
+
+- The `terraform_remote_state`
+- The parameters originally given the `aws_instance`
 
 and defines that
 
-* the autoscaling group will vary between `2` and `4` instances
+- the autoscaling group will vary between `2` and `4` instances
 
 ```hcl
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -245,7 +264,6 @@ module "cluster" {
   ## Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = data.aws_ami.debian_buster.id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = data.template_file.user_data.rendered
 
@@ -257,10 +275,10 @@ module "cluster" {
 
 </details>
 
-
 #### 3. Replacing your aws instance
 
 Now that your module is configured, remove your `aws_instance` declaration(s) and adapt your outputs.
+
 ```hcl
 # Content of your outputs.tf
 output "debian_ami_id" {
@@ -282,49 +300,51 @@ output "asg_name" {
 #### 4. Outcome
 
 Plan and apply your recipe.
-* You should now see numerous new resources created on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:). 
-   * Locate the `autoscaling group`, and the `load balancer` on the left-hand menu.
-   * Inspect them.
-* Access your webpage using
-  * The load balancer address (*don't forget the port*).
-  * Each virtual machine IP.
-  * *What do you observe?*
-  
+
+- You should now see numerous new resources created on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
+  - Locate the `autoscaling group`, and the `load balancer` on the left-hand menu.
+  - Inspect them.
+- Access your webpage using
+  - The load balancer address (_don't forget the port_).
+  - Each virtual machine IP.
+  - _What do you observe?_
+
 ### Replacing the image configuration by an external module
 
 You will now replace the configuration of the instances using the `webapp` module.
 
 Follow the same procedure used for the `cluster` module.
+
 1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
-      > github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
+   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
 2. Configure the module `webapp`.
 3. Remove the `random_pet`, `aws_ami` and `template_file` resources.
 4. Plan, and when ready, apply.
 5. Access your webservers using the load balancer url.
-   * Try refreshing the webpage several times. Does the name changes?
-   * Validate this observation using the following shell commands
-      ```bash
-      > LB_URL="..." # Plug your load balancer URL
-      > WEBSERVER_PORT="..." # Plug the port you used for your webserver
-      > clear; for i in $(seq 1 10000); do tput cup 0 0; curl "${LB_URL}:${WEBSERVER_PORT}"; sleep 0.1; done;
-      ```
-   * Again, does the name change? Why?
+   - Try refreshing the webpage several times. Does the name changes?
+   - Validate this observation using the following shell commands
+     ```bash
+     > LB_URL="..." # Plug your load balancer URL
+     > WEBSERVER_PORT="80"
+     > clear; for i in $(seq 1 10000); do tput cup 0 0; curl "${LB_URL}:${WEBSERVER_PORT}"; sleep 0.1; done;
+     ```
+   - Again, does the name change? Why?
 
 #### Solution
+
 <details>
   <summary>Click here to see.</summary>
 
 1. Module `webapp` and `module` setting
+
 ```HCL
 
 module "webapp" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
-
-  server_port = var.server_port
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
@@ -337,7 +357,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = module.webapp.ami_id # Change me
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = module.webapp.rendered_user_data  # Change me
 
@@ -351,40 +370,44 @@ module "cluster" {
 
 </details>
 
-
 ### Upgrading your modules
 
 You will now upgrade your modules to version `v0.2.0`.
-* The `webapp` module now return a webpage with 
-  * The random pet name from terraform
-  * A random pet name generated during the instance initialisation
-* The `cluster` module will now refresh automatically instances upon changes of the `webapp`.
-  
+
+- The `webapp` module now return a webpage with
+  - The random pet name from terraform
+  - A random pet name generated during the instance initialisation
+- The `cluster` module will now refresh automatically instances upon changes of the `webapp`.
+
 To upgrade your modules
+
 1. Replace in both module sources the tag `v0.1.0` by `v0.2.0`
 2. Add the new argument `instance_warmup` to the `cluster` module, i.e.,
-    ```HCL
-    module "cluster" {
-      source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
-    
-      ... # Other arguments
-      
-      # Autoscaling group arguments
-      min_instance    = 2
-      max_instance    = 4
-      instance_warmup = 15 # Making instance refreshes faster
-    }
-    ```
+
+   ```HCL
+   module "cluster" {
+     source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
+
+     ... # Other arguments
+
+     # Autoscaling group arguments
+     min_instance    = 2
+     max_instance    = 4
+     instance_warmup = 15 # Making instance refreshes faster
+   }
+   ```
+
 3. Init, plan and apply your recipe.
-4. Check what is happening over the next 2-3 minutes on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:). 
-   * What happens if you access and refresh your webpage now? 
-   * *Tip 1: Reuse the previous shell commands.*
-   * *Tip 2: This may take a few minute. Launch the command and go grab a coffee.*
+4. Check what is happening over the next 2-3 minutes on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
+   - What happens if you access and refresh your webpage now?
+   - _Tip 1: Reuse the previous shell commands._
+   - _Tip 2: This may take a few minute. Launch the command and go grab a coffee._
 
 ## Leads for further exploration
 
-* Play around with meta-arguments
-* Browse the Terraform registry for modules that could be useful to your projects
+- Play around with meta-arguments
+- Browse the Terraform registry for modules that could be useful to your projects
 
 ## Troubleshooting
+
 You can look for the solution of this practical in `tutorials/solutions/TP5`.

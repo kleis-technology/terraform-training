@@ -12,10 +12,3 @@ variable "vpc_security_groups" {
   type        = list(any)
   description = "ID(s) of the security groups associated with the VPC."
 }
-
-variable "server_port" {
-  type        = number
-  description = "VM port listening for TCP connections."
-  default     = 8000
-}
-

@@ -14,13 +14,11 @@ terraform {
 
 
 module "webapp" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/webapp?ref=v0.2.0"
-
-  server_port = var.server_port
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=nginx-for-web-demo"
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.2.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # Launching a cluster only if var.max_instance > 1
   count = var.max_instance > 1 ? 1 : 0
@@ -36,7 +34,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = module.webapp.ami_id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = module.webapp.rendered_user_data
 
@@ -47,7 +44,7 @@ module "cluster" {
 }
 
 resource "aws_instance" "webserver" {
-  count = var.max_instance > 1 ? 0 : 1
+  count                       = var.max_instance > 1 ? 0 : 1
   ami                         = module.webapp.ami_id
   instance_type               = "t2.nano"
   key_name                    = var.ssh_key_name
@@ -59,4 +56,3 @@ resource "aws_instance" "webserver" {
     Name = "kleis-${var.environment_name}-vm"
   }
 }
-

@@ -7,10 +7,3 @@ variable "with_webpage" {
   description = "Boolean defining if the a webpage is served."
   type        = bool
 }
-
-variable "server_port" {
-  type        = number
-  description = "VM port listening for TCP connections."
-  default     = 8000
-}
-

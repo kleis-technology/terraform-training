@@ -9,12 +9,6 @@ variable "ssh_key_name" {
   type        = string
 }
 
-variable "server_port" {
-  description = "The name to use for all the cluster resources"
-  type        = number
-  default     = 8000
-}
-
 # Cluster inputs
 variable "min_instance" {
   description = "Minimum number of instances in the cluster."

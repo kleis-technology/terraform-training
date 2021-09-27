@@ -39,7 +39,6 @@ data "template_file" "user_data" {
 
   vars = {
     server_name = random_pet.vm.id
-    server_port = var.server_port
   }
 }
 
@@ -62,7 +61,7 @@ resource "random_pet" "cluster" {
 }
 
 module "cluster" {
-  source = "github.com/meyerx/terraform-example-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
@@ -75,7 +74,6 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = data.aws_ami.debian_buster.id
-  server_port        = var.server_port
   instance_type      = "t2.nano"
   rendered_user_data = data.template_file.user_data.rendered
 

@@ -42,7 +42,6 @@ data "template_file" "webservers" {
 
   vars = {
     server_name = each.key
-    server_port = var.server_port
   }
 }
 

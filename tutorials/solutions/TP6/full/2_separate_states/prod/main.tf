@@ -5,7 +5,7 @@ terraform {
       version = "~> 3.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "~> 3.1"
     }
   }
@@ -15,10 +15,10 @@ terraform {
   }
 }
 
-provider aws {
+provider "aws" {
 }
 
-provider random {
+provider "random" {
 }
 
 data "terraform_remote_state" "training" {

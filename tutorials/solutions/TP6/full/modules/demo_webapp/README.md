@@ -5,6 +5,6 @@ This folder contains example [Terraform](https://www.terraform.io/) configuratio
 This module imports two external modules and relies on two other example modules.
 
 The module expects as input variables
-* network information
-* information about the instance to run
 
+- network information
+- information about the instance to run
