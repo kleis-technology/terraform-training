@@ -4,8 +4,8 @@ In this practical, we will see how to define a Terraform configuration and explo
 
 ### Goal
 
-You will build a basic Terraform configuration and inspect the terraform state resulting from its deployment.
-You will then explore the Terraform state after provisioning.
+You will build a basic Terraform configuration and inspect the terraform state resulting from its deployment. You will then explore the
+Terraform state after provisioning.
 
 ### Context
 
@@ -32,9 +32,9 @@ terraform {
 ```
 
 1. The first block declare that the AWS provider is required with his source and version.
-   - Can you tell who is the maintainer of the AWS provider from the previous declaration?
-   - What is the constraint imposed on the version of the provider?
-   - Is the provider yet imported?
+    - Can you tell who is the maintainer of the AWS provider from the previous declaration?
+    - What is the constraint imposed on the version of the provider?
+    - Is the provider yet imported?
 
 ```HCL
 # Second block
@@ -43,16 +43,16 @@ provider "aws" {
 ```
 
 2. The second block declare the AWS provider.
-   - Try removing the block, and plan.
+    - Try removing the block, and plan.
 
 ### S3 Bucket
 
-To create an infrastructure, you need at least one resource.
-The following resource block declare an AWS S3 bucket (i.e., a container stored in Amazon S3).
+To create an infrastructure, you need at least one resource. The following resource block declare an AWS S3 bucket (i.e., a container stored
+in Amazon S3).
 
 ```HCL
 resource "aws_s3_bucket" "bucket" {
-   bucket_prefix = "stage-1-"
+  bucket_prefix = "stage-1-"
 }
 ```
 
@@ -99,8 +99,8 @@ less terraform.tfstate
 ```
 
 3. Answer those questions
-   - What are the difference between the two previous representations of the state?
-   - Can you find your bucket using the [AWS console](https://s3.console.aws.amazon.com/s3/home?region=us-west-1#)?
+    - What are the difference between the two previous representations of the state?
+    - Can you find your bucket using the [AWS console](https://s3.console.aws.amazon.com/s3/home?region=us-west-1#)?
 
 ## Importing and using an additional provider
 
@@ -110,10 +110,11 @@ First, you will import the provider Random, and then alter the S3 bucket resourc
 
 ### Importing a provider
 
-1. Go on the Terraform Registry webpage for the provider random ([direct link](https://registry.terraform.io/providers/hashicorp/random/latest)).
+1. Go on the Terraform Registry webpage for the provider
+   random ([direct link](https://registry.terraform.io/providers/hashicorp/random/latest)).
 2. Locate the `Use Provider` button, top-right and interact with it.
 3. Follow the instruction to install the provider.
-   - _Hint: multiple providers constraints can coexist in the `required_providers` block_
+    - _Hint: multiple providers constraints can coexist in the `required_providers` block_
 4. (opt) Change the requirements to use the latest 3.1 version of the provider.
 
 Before continuing, answer the following questions:
@@ -131,12 +132,12 @@ Before continuing, answer the following questions:
 ```HCL
 terraform {
   required_providers {
-    aws = {
+    aws    = {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "3.1.0"
     }
   }
@@ -162,8 +163,9 @@ provider "random" {
 
 You can now use the provider `Random` to define a random prefix for you S3 Bucket.
 
-1. Go on the Terraform Registry webpage for the provider random and click on the `Documentation` tab ([direct link](https://registry.terraform.io/providers/hashicorp/random/latest/docs)).
-2. Locate the `Resources` panel on the right of the page, and expand the list.
+1. Go on the Terraform Registry webpage for the provider random and click on the `Documentation`
+   tab ([direct link](https://registry.terraform.io/providers/hashicorp/random/latest/docs)).
+2. Locate the `Resources` panel on the left-side of the page, and expand the list.
 3. Add a `random_pet` resource using the documentation to guide you.
 4. Replace the S3 `bucket_prefix` using a reference to the `random_pet` id attribute.
 5. Plan, and then apply your configuration.
@@ -190,7 +192,7 @@ resource "random_pet" "bucket" {
 
 ```HCL
 resource "aws_s3_bucket" "bucket" {
-   bucket_prefix = "${random_pet.bucket.id}-"
+  bucket_prefix = "${random_pet.bucket.id}-"
 }
 ```
 
@@ -198,19 +200,20 @@ resource "aws_s3_bucket" "bucket" {
 
 ### Inspecting the state
 
-As an alternative to opening the state file, or using the `terraform show` command, use the `terrafom state [...]` commands to inspect your state.
+As an alternative to opening the state file, or using the `terraform show` command, use the `terrafom state [...]` commands to inspect your
+state.
 
 1. The `terraform state list` will display all the resources existing in your configuration.
 2. The `terraform state show [RESOURCE_ADDRESS]` will display information for the resource in question
-   - For instance, try `terraform state show random_pet.bucket`.
+    - For instance, try `terraform state show random_pet.bucket`.
 
 ## Leads for further exploration
 
 - Try to figure out when the random prefix will change.
-  - Can you change this behavior?
+    - Can you change this behavior?
 - Try different random prefix for your bucket.
-  - Use more words in the `random_pet` name.
-  - Create a random sentence based on `random_pet` names.
+    - Use more words in the `random_pet` name.
+    - Create a random sentence based on `random_pet` names.
 - Try importing another provider of your choice.
 
 ## Troubleshooting

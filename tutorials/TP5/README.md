@@ -39,89 +39,18 @@ terraform apply terraform.tfplan
 
 We will consider different scenarios in which using meta-arguments could prove useful.
 
-### Conditional instance configuration
-
-In the first scenario, you will create an _if-else_ condition defining the configuration of your virtual machine.
-
-The _HashiCorp Language_ (HCL) doesn't support _if-else_ statements.
-You will have to use an alternative approach create such statement.
-
-- Add a new boolean variable named `with_webpage`.
-  - If `with_webpage` then your instance will only accept ssh connections.
-  - Else the instance will accept ssh connections and serve a webpage.
-- _Hint: think about [the meta-argument `count`](https://www.terraform.io/docs/language/meta-arguments/count.html) and [the ternary operator](https://www.terraform.io/docs/language/expressions/conditionals.html)_.
-
-#### Solution
-
-<details>
-  <summary>Click here to see.</summary>
-1. Add an the input variable.
-
-```hcl
-variable "with_webpage" {
-  description = "Boolean defining if the a webpage is served."
-  type = bool
-}
-```
-
-2. Duplicate and modify your `aws_instance`(s).
-
-```hcl
-resource "aws_instance" "only_ssh_vm" {
-  # Create one instance if var.withHTTP is set to false
-  count                       = var.with_webpage ? 0 : 1
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
-  key_name                    = var.ssh_key_name
-  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
-  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
-  #user_data                   = data.template_file.user_data.rendered
-  associate_public_ip_address = true
-  tags = {
-    Name = "kleis-training-ssh-vm"
-  }
-}
-
-resource "aws_instance" "webserver_vm" {
-  # Create one instance if var.withHTTP is set to true
-  count                       = var.with_webpage ? 1 : 0
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
-  key_name                    = var.ssh_key_name
-  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
-  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
-  associate_public_ip_address = true
-  user_data                   = data.template_file.user_data.rendered
-  tags = {
-    Name = "kleis-training-webserver-vm"
-  }
-}
-```
-
-3. Adapt your output. This solution shows how to use [string directives](https://www.terraform.io/docs/language/expressions/strings.html#directives).
-
-```hcl
-output "vm_ip" {
-  # We use a 'if string directive' to select the proper aws_instance.
-  # The index of the instance must be specified given the use of 'count'.
-  value = "%{ if var.with_webpage }${aws_instance.webserver_vm[0].public_ip}%{ else }${aws_instance.only_ssh_vm[0].public_ip}%{ endif }"
-}
-```
-
-</details>
-
 ### Multiple instances with different configurations
 
 In this scenario, you will create multiple virtual machines with different configurations.
 
-Let's assume that the configuration script has different behaviors in function of its assigned virtual machine name.
-The machine names would be provided as input variables, e.g.,
+Let's assume that the configuration script has different behaviors in function of its assigned virtual machine name. The machine names would
+be provided as input variables, e.g.,
 
 ```hcl
 variable "cattle_names" {
   description = "Cattle names."
   type        = list(string)
-  default = [
+  default     = [
     "mighty_panda",
     "giant_owl",
     "cute_beaver"
@@ -129,12 +58,12 @@ variable "cattle_names" {
 }
 ```
 
-For each name in the list, a virtual machine will be instantiated.
-Have a look at the `user-data.sh`script provided with this TP to understand how different behavior are enforced.
+For each name in the list, a virtual machine will be instantiated. Have a look at the `user-data.sh`script provided with this TP to
+understand how different behavior are enforced.
 
 - Re-use the `template_file` and `aws_instance` resources.
-  - Don't duplicate them.
-  - *Hint: Think about *for-like* statements supported by HCL.*
+    - Don't duplicate them.
+    - *Hint: Think about *for-like* statements supported by HCL.*
 
 #### Solution
 
@@ -166,7 +95,7 @@ resource "aws_instance" "webservers" {
   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
   associate_public_ip_address = true
   user_data                   = data.template_file.webservers[each.key].rendered
-  tags = {
+  tags                        = {
     Name = "kleis-training-webserver-${each.key}"
   }
 }
@@ -177,8 +106,80 @@ resource "aws_instance" "webservers" {
 ```hcl
 output "vm_ips" {
   value = tomap({
-    for name, webserver in aws_instance.webservers : name => webserver.public_ip
+  for name, webserver in aws_instance.webservers : name => webserver.public_ip
   })
+}
+```
+
+</details>
+
+### (Optional) Conditional instance configuration
+
+In the first scenario, you will create an _if-else_ condition defining the configuration of your virtual machine.
+
+The _HashiCorp Language_ (HCL) doesn't support _if-else_ statements. You will have to use a hack to create such statement.
+
+- Add a new boolean variable named `with_webpage`.
+    - If `with_webpage` is set to false then your instance will only accept ssh connections.
+    - Otherwise, the instance will accept ssh connections and serve a webpage.
+- _Hint: think about [the meta-argument `count`](https://www.terraform.io/docs/language/meta-arguments/count.html)
+  and [the ternary operator](https://www.terraform.io/docs/language/expressions/conditionals.html)_.
+
+#### Solution
+
+<details>
+  <summary>Click here to see.</summary>
+1. Add an the input variable.
+
+```hcl
+variable "with_webpage" {
+  description = "Boolean defining if the a webpage is served."
+  type        = bool
+}
+```
+
+2. Duplicate and modify your `aws_instance`(s).
+
+```hcl
+resource "aws_instance" "only_ssh_vm" {
+  # Create one instance if var.withHTTP is set to false
+  count                       = var.with_webpage ? 0 : 1
+  ami                         = data.aws_ami.debian_buster.id
+  instance_type               = "t2.nano"
+  key_name                    = var.ssh_key_name
+  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
+  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
+  #user_data                   = data.template_file.user_data.rendered
+  associate_public_ip_address = true
+  tags                        = {
+    Name = "kleis-training-ssh-vm"
+  }
+}
+
+resource "aws_instance" "webserver_vm" {
+  # Create one instance if var.withHTTP is set to true
+  count                       = var.with_webpage ? 1 : 0
+  ami                         = data.aws_ami.debian_buster.id
+  instance_type               = "t2.nano"
+  key_name                    = var.ssh_key_name
+  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
+  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
+  associate_public_ip_address = true
+  user_data                   = data.template_file.user_data.rendered
+  tags                        = {
+    Name = "kleis-training-webserver-vm"
+  }
+}
+```
+
+3. Adapt your output. This solution shows how to
+   use [string directives](https://www.terraform.io/docs/language/expressions/strings.html#directives).
+
+```hcl
+output "vm_ip" {
+  # We use a 'if string directive' to select the proper aws_instance.
+  # The index of the instance must be specified given the use of 'count'.
+  value = "%{ if var.with_webpage }${aws_instance.webserver_vm[0].public_ip}%{ else }${aws_instance.only_ssh_vm[0].public_ip}%{ endif }"
 }
 ```
 
@@ -188,8 +189,8 @@ output "vm_ips" {
 
 Terraform modules make it easier to organize, reuse, share and import Infrastructure as Code.
 
-In this exercise, you will use two example modules.
-These modules are put at your disposal [on a Git repository](https://github.com/meyerx/terraform-example-modules).
+In this exercise, you will use two example modules. These modules are put at your
+disposal [on a Git repository](https://github.com/meyerx/terraform-example-modules).
 
 This Git repository contains the modules
 
@@ -203,9 +204,11 @@ Start by using the `v0.1.0` version of these modules that provides
 
 ### Using a module to replace a single AWS Instance by a cluster
 
-In this scenario, you will put the "web application" in production.
-Here, the load is expected to vary across time. The webapp is therefore migrated on an autoscaling cluster with a load balancer.
-Provisioning an [AWS autoscaling group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) with an [application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) requires a considerable effort.
+In this scenario, you will put the "web application" in production. Here, the load is expected to vary across time. The webapp is therefore
+migrated on an autoscaling cluster with a load balancer. Provisioning
+an [AWS autoscaling group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) with
+an [application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) requires a
+considerable effort.
 
 The `cluster` module will allow doing that without the hassle of setting up everything ourselves.
 
@@ -229,7 +232,7 @@ This simply declares to use the module `cluster`.
 Then, run `terraform init -backend-config="backend.tfvars"`
 
 - The module is now downloaded in your `.terraform/` folder.
-- Locate it and have a look at the `inputs.tf` file.
+- Locate it and have a look at the `variables.tf` file.
 
 Finally, run `terraform plan`. _What happens?_
 
@@ -301,13 +304,14 @@ output "asg_name" {
 
 Plan and apply your recipe.
 
-- You should now see numerous new resources created on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
-  - Locate the `autoscaling group`, and the `load balancer` on the left-hand menu.
-  - Inspect them.
+- You should now see numerous new resources created on
+  your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
+    - Locate the `autoscaling group`, and the `load balancer` on the left-hand menu.
+    - Inspect them.
 - Access your webpage using
-  - The load balancer address (_don't forget the port_).
-  - Each virtual machine IP.
-  - _What do you observe?_
+    - The load balancer address (_don't forget the port_).
+    - Each virtual machine IP.
+    - _What do you observe?_
 
 ### Replacing the image configuration by an external module
 
@@ -316,19 +320,19 @@ You will now replace the configuration of the instances using the `webapp` modul
 Follow the same procedure used for the `cluster` module.
 
 1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
-   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.2.0"
+   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.1.0"
 2. Configure the module `webapp`.
 3. Remove the `random_pet`, `aws_ami` and `template_file` resources.
 4. Plan, and when ready, apply.
 5. Access your webservers using the load balancer url.
-   - Try refreshing the webpage several times. Does the name changes?
-   - Validate this observation using the following shell commands
-     ```bash
-     > LB_URL="..." # Plug your load balancer URL
-     > WEBSERVER_PORT="80"
-     > clear; for i in $(seq 1 10000); do tput cup 0 0; curl "${LB_URL}:${WEBSERVER_PORT}"; sleep 0.1; done;
-     ```
-   - Again, does the name change? Why?
+    - Try refreshing the webpage several times. Does the name changes?
+    - Validate this observation using the following shell commands
+      ```bash
+      > LB_URL="..." # Plug your load balancer URL
+      > WEBSERVER_PORT="80"
+      > clear; for i in $(seq 1 10000); do tput cup 0 0; curl "${LB_URL}:${WEBSERVER_PORT}"; sleep 0.1; done;
+      ```
+    - Again, does the name change? Why?
 
 #### Solution
 
@@ -361,8 +365,8 @@ module "cluster" {
   rendered_user_data = module.webapp.rendered_user_data  # Change me
 
   # Autoscaling group arguments
-  min_instance    = 2
-  max_instance    = 4
+  min_instance = 2
+  max_instance = 4
 }
 ```
 
@@ -375,8 +379,8 @@ module "cluster" {
 You will now upgrade your modules to version `v0.2.0`.
 
 - The `webapp` module now return a webpage with
-  - The random pet name from terraform
-  - A random pet name generated during the instance initialisation
+    - The random pet name from terraform
+    - A random pet name generated during the instance initialisation
 - The `cluster` module will now refresh automatically instances upon changes of the `webapp`.
 
 To upgrade your modules
@@ -398,10 +402,11 @@ To upgrade your modules
    ```
 
 3. Init, plan and apply your recipe.
-4. Check what is happening over the next 2-3 minutes on your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
-   - What happens if you access and refresh your webpage now?
-   - _Tip 1: Reuse the previous shell commands._
-   - _Tip 2: This may take a few minute. Launch the command and go grab a coffee._
+4. Check what is happening over the next 2-3 minutes on
+   your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
+    - What happens if you access and refresh your webpage now?
+    - _Tip 1: Reuse the previous shell commands._
+    - _Tip 2: This may take a few minute. Launch the command and go grab a coffee._
 
 ## Leads for further exploration
 

@@ -41,11 +41,10 @@ Until now, the state of your terraform configuration was stored locally.
 
 1. Locate the `terraform.tfstate` file in the current folder.
 2. Inspect its content (e.g., using the command `less`).
-   - Any unexpected additional information?
-   - For instance, what about your VM (e.g., number of CPUs, private IP)?
+    - Any unexpected additional information?
+    - For instance, what about your VM (e.g., number of CPUs, private IP)?
 
-The current state of your configuration can equally be accessed by using the `terraform show` command.
-For instance, try
+The current state of your configuration can equally be accessed by using the `terraform show` command. For instance, try
 
 ```bash
 # Terraform formatted
@@ -75,8 +74,7 @@ We are about to migrate the state remotely using the backend of our choice.
 
 Configuring Terraform to use a specific state backend is a two steps process.
 
-First, you must provide to Terraform the backend configuration.
-This configuration can be passed either as arguments, e.g.,
+First, you must provide to Terraform the backend configuration. This configuration can be passed either as arguments, e.g.,
 
 ```bash
 terraform init
@@ -94,12 +92,12 @@ Then, the backend must be declared in the Terraform recipe.
 
 ```HCL
 terraform {
-   required_providers {
-      ... # Your providers, incl. AWS
-   }
-   backend "s3" {
-      ... # Parameters
-   }
+  required_providers {
+    ... # Your providers, incl. AWS
+  }
+  backend "s3" {
+    ... # Parameters
+  }
 ```
 
 For this practical, you will use a preconfigured S3 bucket as backend.
@@ -111,14 +109,15 @@ Have a quick look at the [S3 backend configuration](https://www.terraform.io/doc
 First, create the `backend.tfvars` file and add the following information about the S3 bucket
 
 ```HCL
-region         = "eu-west-1"
-profile        = "kleis-sandbox"
-role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
-bucket         = "tfstate-kleis-organization"
-key            = "kleis-sandbox/training/remote_state/YOUR_USERNAME/terraform.tfstate"
+region   = "eu-west-1"
+profile  = "kleis-sandbox"
+role_arn = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+bucket   = "tfstate-kleis-organization"
+key      = "kleis-sandbox/training/remote_state/YOUR_USERNAME/terraform.tfstate"
 ```
 
-These attributes inform Terraform on the location of the S3 bucket (_region_ and _bucket_), your State path (_key_) and the credentials and role to assume (_profile_ and _role_arn_).
+These attributes inform Terraform on the location of the S3 bucket (_region_ and _bucket_), your State path (_key_) and the credentials and
+role to assume (_profile_ and _role_arn_).
 
 Make sure to replace `MY_USERNAME` in the `key` attribute with your username.
 
@@ -128,49 +127,49 @@ Then, declare in your recipe that the state will be stored on an S3 bucket.
 
 ```HCL
 terraform {
-    required_providers {
-        ... # Your providers, incl. AWS
-    }
-    backend "s3" {
-        # AWS Access control list
-        # Bucket owner has full control
-        acl     = "private"
-        encrypt = false
-    }
+  required_providers {
+    ... # Your providers, incl. AWS
+  }
+  backend "s3" {
+    # AWS Access control list
+    # Bucket owner has full control
+    acl     = "private"
+    encrypt = false
+  }
 }
 ```
 
 ### Is this minimal backend configuration sufficient?
 
-Before migrating the State, you should ask yourself several questions:
+The aforementioned does not:
 
-1. Do I have sensitive data in my state? Should I encrypt it?
-2. Am I the only one working on this configuration?
-3. Is the State at risk of being concurrently accessed and written?
+1. Encrypt the state. Sensitive data would be exposed.
+2. Manage concurrent access to the state.
+    - That is, protecting the state from concurrent write for instance.
 
-Protecting your State from exposure and concurrent access is usually key.
+We shall see in the following sections how to setup the remote backend to encrypt and protect the State.
 
 ### Adding encryption
 
-To make sure that your state is duly protected, you can use the S3 bucket Server Side Encryption (SSE).
-This is enabled on the pre-configured AWS S3 bucket, thus you have to add the key ID in your `backend.tfvars` file.
+To make sure that your state is duly protected, you can use the S3 bucket Server Side Encryption (SSE). This is enabled on the
+pre-configured AWS S3 bucket, thus you have to add the key ID in your `backend.tfvars` file.
 
 ```HCL
-kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
+kms_key_id = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
 ```
 
 Additionally, you must inform Terraform in your recipe that the backend is encrypted.
 
 ```HCL
 terraform {
-    required_providers {
-        ... # Your providers, incl. AWS
-    }
-    backend "s3" {
-        acl     = "private"
-        # Set encrypt to true
-        encrypt = true
-    }
+  required_providers {
+    ... # Your providers, incl. AWS
+  }
+  backend "s3" {
+    acl     = "private"
+    # Set encrypt to true
+    encrypt = true
+  }
 }
 ```
 
@@ -178,10 +177,11 @@ terraform {
 
 Now, you will make sure that concurrent accesses on the State are made safely.
 
-At this end, Terraform can use an _AWS Dynamo DB_ to lock the access to the remote State file (see [S3 backend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html)).
+At this end, Terraform can use an _AWS Dynamo DB_ to lock the access to the remote State file (
+see [S3 backend configuration](https://www.terraform.io/docs/language/settings/backends/s3.html)).
 
-The pre-configured AWS S3 bucket includes a _AWS Dynamo DB_ with a table `tfstate-lock` dedicated to lock Terraform states.
-Therefore, adding the name of this table in your `backend.tfvars` file is sufficient to protect your State from concurrent access.
+The pre-configured AWS S3 bucket includes a _AWS Dynamo DB_ with a table `tfstate-lock` dedicated to lock Terraform states. Therefore,
+adding the name of this table in your `backend.tfvars` file is sufficient to protect your State from concurrent access.
 
 ```HCL
 dynamodb_table = "tfstate-lock"
@@ -195,7 +195,7 @@ Finally, migrate the local state using the following Terraform command
 terraform init --backend-config="backend.tfvars"
 ```
 
-You will be asked if you want to copy your local State to the remote storage. Answer, `yes`.
+You will be asked if you want to migrate your local State to the remote storage. Answer, `yes`.
 
 The same exact procedure can be used to initialize a Terraform configuration from scratch.
 
@@ -222,13 +222,13 @@ dynamodb_table = "tfstate-lock"
 
 ```HCL
 terraform {
-    required_providers {
-      ... # Your providers (incl. AWS)
-    }
-    backend "s3" {
-        acl     = "private"
-        encrypt = true
-    }
+  required_providers {
+    ... # Your providers (incl. AWS)
+  }
+  backend "s3" {
+    acl     = "private"
+    encrypt = true
+  }
 }
 ```
 
@@ -236,22 +236,26 @@ terraform {
 
 ## Referring to Another Remote State
 
-Our current recipe includes _indirect_ references to an infrastructure provisioned by another Terraform recipe. Indeed, the network infrastructure (VPC, subnet, etc.) are declared in a recipe which state is stored on the same S3 bucket that we have been using until now.
+Our current recipe includes _indirect_ references to an infrastructure provisioned by another Terraform recipe. Indeed, the network
+infrastructure (VPC, subnet, etc.) are declared in a recipe which state is stored on the same S3 bucket that we have been using until now.
 
-The state in question is therefore located on the `tfstate-kleis-organization` bucket at the following location `kleis-sandbox/training/terraform.tfstate`.
+The state in question is therefore located on the `tfstate-kleis-organization` bucket at the following
+location `kleis-sandbox/training/terraform.tfstate`.
 
-Instead of using _indirect_ references, that is using variables for the network configuration, or even worse hardcoded string, you will use explicit references to the other Terraform configuration.
+Instead of using _indirect_ references, that is using variables for the network configuration, or even worse hardcoded string, you will use
+explicit references to the other Terraform configuration.
 
 _Can you figure out what are the advantages of doing so?_
 
 ### Importing the Remote State as a Data Source
 
-Importing the remote configuration is achieved by using the `terraform_remote_state` data source (see [terraform_remote_state](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state)).
+Importing the remote configuration is achieved by using the `terraform_remote_state` data source (
+see [terraform_remote_state](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state)).
 
 ```HCL
 data "terraform_remote_state" "training" {
   backend = "s3"
-  config = {
+  config  = {
     acl            = "private"
     encrypt        = true
     region         = "eu-west-1"
@@ -269,25 +273,23 @@ This setting is identical to the one used to store your remote state except for 
 
 ### Accessing attributes from the remote state
 
-The remote state is now available as a data source.
-This remote state declares several `outputs`, including the followings
+The remote state is now available as a data source. This remote state declares several `outputs`, including the followings
 
 ```HCL
 output "subnet_id" {
-   value = aws_subnet.training.id
+  value = aws_subnet.training.id
 }
 output "vm_security_group_id" {
   value = aws_security_group.vm.id
 }
 ```
 
-These `outputs` can now be referenced in the recipe by prefixing them by: `data.terraform_remote_state.training.outputs`.
-For instance, the `subnet_id` can be referred as `data.terraform_remote_state.training.outputs.subnet_id`.
+These `outputs` can now be referenced in the recipe by prefixing them by: `data.terraform_remote_state.training.outputs`. For instance,
+the `subnet_id` can be referred as `data.terraform_remote_state.training.outputs.subnet_id`.
 
 ### Updating the recipe
 
-Update your recipe to replace _indirect_ references by references to the other remote state.
-Then, plan and apply your recipe.
+Update your recipe to replace _indirect_ references by references to the other remote state. Then, plan and apply your recipe.
 
 ### Solution
 
@@ -299,30 +301,31 @@ Then, plan and apply your recipe.
 
 ```HCL
 resource "aws_instance" "vm" {
-   ami                         = data.aws_ami.debian_buster.id
-   instance_type               = "t2.nano"
-   key_name                    = var.ssh_key_name
-   subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id # Changed
-   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]  # Changed
-   associate_public_ip_address = true
-   user_data                   = data.template_file.user_data.rendered
-   tags = {
-      Name = "kleis-training-vm"
-   }
+  ami                         = data.aws_ami.debian_buster.id
+  instance_type               = "t2.nano"
+  key_name                    = var.ssh_key_name
+  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id # Changed
+  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]  # Changed
+  associate_public_ip_address = true
+  user_data                   = data.template_file.user_data.rendered
+  tags                        = {
+    Name = "kleis-training-vm"
+  }
 }
 ```
 
 3. Clean-up your `variables.tf` and `config.auto.tfvars` files.
 4. Try your new recipe.
+
 </details>
 
 ## Bonus: Reformatting your \*.tf Files
 
-By now, you have accumulated numerous changes in your terraform recipe.
-The indentation in place in your files might no longer follow [the canonical format and style](https://www.terraform.io/docs/language/syntax/style.html) (_Good Practices!_).
+By now, you have accumulated numerous changes in your terraform recipe. The indentation in place in your files might no longer
+follow [the canonical format and style](https://www.terraform.io/docs/language/syntax/style.html) (_Good Practices!_).
 
-[The `terraform fmt` command](https://www.terraform.io/docs/cli/commands/fmt.html) is there to help you.
-From your working directory, call it as follows
+[The `terraform fmt` command](https://www.terraform.io/docs/cli/commands/fmt.html) is there to help you. From your working directory, call
+it as follows
 
 ```bash
 > terraform fmt -diff .
@@ -332,7 +335,8 @@ This command will generate a list of changes and reformat your files.
 
 ## Bonus: Visualizing the Terraform Dependency Graph
 
-You can export the dependency graph of your current configuration using [the `terraform graph` command](https://www.terraform.io/docs/cli/commands/graph.html).
+You can export the dependency graph of your current configuration
+using [the `terraform graph` command](https://www.terraform.io/docs/cli/commands/graph.html).
 
 For instance, you can directly generate the graph in DOT format corresponding to your configuration by typing
 
@@ -345,16 +349,18 @@ For instance, you can directly generate the graph in DOT format corresponding to
 If you have GraphViz installed on your computer, you can generate a `svg` by typing
 
 ```bash
+> brew install graphviz # Install dot
 > terraform graph | dot -Tsvg > graph.svg
 ```
 
-Otherwise, just copy the output of the `terraform graph` command and paste in any only GraphViz website (e.g., [this one](https://dreampuf.github.io/GraphvizOnline)).
-Or alternatively, try installing some external tool (e.g., [terraform-graph-beautifier](https://github.com/pcasteran/terraform-graph-beautifier)) .
+Otherwise, just copy the output of the `terraform graph` command and paste in any only GraphViz website (
+e.g., [this one](https://dreampuf.github.io/GraphvizOnline)). Or alternatively, try installing some external tool (
+e.g., [terraform-graph-beautifier](https://github.com/pcasteran/terraform-graph-beautifier)) .
 
 ## Leads for further exploration
 
 - Try to link what we have seen until now with the _Infrastructure as Code guiding principles_.
-  - Can you think of any missing _tool_ or Terraform _object_ that would help you follow these principles?
+    - Can you think of any missing _tool_ or Terraform _object_ that would help you follow these principles?
 
 ## Troubleshooting
 
