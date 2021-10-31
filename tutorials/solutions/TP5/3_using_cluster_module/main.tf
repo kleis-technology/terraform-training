@@ -16,6 +16,7 @@ terraform {
 }
 
 provider "aws" {
+  profile = "kleis-sandbox"
 }
 
 provider "random" {
@@ -61,7 +62,7 @@ resource "random_pet" "cluster" {
 }
 
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
+  source = "git::https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
