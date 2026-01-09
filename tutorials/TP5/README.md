@@ -1,15 +1,15 @@
 # Using Meta-Arguments and External Modules
 
-In this practical, we will see how to use meta-arguments to create multiple resources and how to call modules from our recipe.
+In this exercise, we will see how to use meta-arguments to create multiple resources and how to call modules from our code.
 
 ### Goal
 
 - Interact with meta-arguments
-- Import external modules stored on a Git repository
+- Import external modules stored in a Git repository
 
 ### Context
 
-Restart from the recipe built in the previous practical.
+Restart from the code built in the previous exercise.
 
 #### Setting/resetting recipe
 
@@ -58,10 +58,10 @@ variable "cattle_names" {
 }
 ```
 
-For each name in the list, a virtual machine will be instantiated. Have a look at the `user-data.sh`script provided with this TP to
-understand how different behavior are enforced.
+For each name in the list, a virtual machine will be instantiated. Have a look at the `user-data.sh` script provided with this exercise to
+understand how different behaviors are enforced.
 
-- Re-use the `template_file` and `aws_instance` resources.
+- Re-use the `templatefile` function and `aws_instance` resources.
     - Don't duplicate them.
     - *Hint: Think about *for-like* statements supported by HCL.*
 
@@ -71,30 +71,22 @@ understand how different behavior are enforced.
 
   <summary>Click here to see.</summary>
 
-1. Use [a `for_each` meta-argument](https://www.terraform.io/docs/language/meta-arguments/for_each.html), for instance.
-2. Modify your `template_file` and `aws_instance` resources.
+1. Use [a `for_each` meta-argument](https://www.terraform.io/docs/language/meta-arguments/for_each.html).
+2. Modify your `aws_instance` resource.
 
 ```hcl
-data "template_file" "webservers" {
-  for_each = toset(var.cattle_names)
-
-  template = file("user-data.sh")
-
-  vars = {
-    server_name = each.key
-  }
-}
-
 resource "aws_instance" "webservers" {
   for_each = toset(var.cattle_names)
 
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = var.ssh_key_name
   subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
   associate_public_ip_address = true
-  user_data                   = data.template_file.webservers[each.key].rendered
+  user_data = templatefile("user-data.sh", {
+    server_name = each.key
+  })
   tags                        = {
     Name = "kleis-training-webserver-${each.key}"
   }
@@ -106,7 +98,7 @@ resource "aws_instance" "webservers" {
 ```hcl
 output "vm_ips" {
   value = tomap({
-  for name, webserver in aws_instance.webservers : name => webserver.public_ip
+    for name, webserver in aws_instance.webservers : name => webserver.public_ip
   })
 }
 ```
@@ -143,13 +135,13 @@ variable "with_webpage" {
 ```hcl
 resource "aws_instance" "only_ssh_vm" {
   # Create one instance if var.withHTTP is set to false
+  # This instance does not have any user data
   count                       = var.with_webpage ? 0 : 1
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = var.ssh_key_name
   subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
-  #user_data                   = data.template_file.user_data.rendered
   associate_public_ip_address = true
   tags                        = {
     Name = "kleis-training-ssh-vm"
@@ -159,13 +151,15 @@ resource "aws_instance" "only_ssh_vm" {
 resource "aws_instance" "webserver_vm" {
   # Create one instance if var.withHTTP is set to true
   count                       = var.with_webpage ? 1 : 0
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = var.ssh_key_name
   subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
   associate_public_ip_address = true
-  user_data                   = data.template_file.user_data.rendered
+  user_data = templatefile("user-data.sh", {
+    server_name = random_pet.pet_name.id
+  })
   tags                        = {
     Name = "kleis-training-webserver-vm"
   }
@@ -190,7 +184,7 @@ output "vm_ip" {
 Terraform modules make it easier to organize, reuse, share and import Infrastructure as Code.
 
 In this exercise, you will use two example modules. These modules are put at your
-disposal [on a Git repository](https://github.com/meyerx/terraform-example-modules).
+disposal [in a Git repository](https://github.com/kleis-technology/terraform-example-modules).
 
 This Git repository contains the modules
 
@@ -199,7 +193,7 @@ This Git repository contains the modules
 
 Start by using the `v0.1.0` version of these modules that provides
 
-- A simple `webapp` _configuration_: that is, an AMI and a rendered configuration script.
+- A simple `webapp` _configuration_: that is, an AMI and a rendered websever configuration script.
 - A simple functional `cluster`.
 
 ### Using a module to replace a single AWS Instance by a cluster
@@ -218,16 +212,16 @@ First, add the module into your recipe as follows
 
 ```hcl
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
   # No arguments for now
 }
 ```
 
-This simply declares to use the module `cluster`.
+This declares to use the module `cluster`.
 
-- From the github repository `meyerx/terraform-example-modules.git`
+- From the github repository `kleis-technology/terraform-example-modules.git`
 - Located in the `//modules/cluster`
-- With version `?ref=v0.1.0` (i.e., Git tag in this case)
+- With version `?ref=v0.3.0` (i.e., Git tag in this case)
 
 Then, run `terraform init -backend-config="backend.tfvars"`
 
@@ -243,7 +237,7 @@ Try configuring the module on your own by reusing values already defined in your
 <details>
  <summary>Click here for a solution.</summary>
 
-This configuration re-use
+This configuration re-uses
 
 - The `terraform_remote_state`
 - The parameters originally given the `aws_instance`
@@ -254,7 +248,7 @@ and defines that
 
 ```hcl
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -266,9 +260,11 @@ module "cluster" {
 
   ## Instance arguments
   ssh_key_name       = var.ssh_key_name
-  ami_id             = data.aws_ami.debian_buster.id
-  instance_type      = "t2.nano"
-  rendered_user_data = data.template_file.user_data.rendered
+  ami_id             = data.aws_ami.debian_latest.id
+  instance_type      = "t4g.nano"
+  rendered_user_data = templatefile("user-data.sh", {
+    server_name = random_pet.pet_name.id
+  })
 
   ## Autoscaling group arguments
   min_instance = 2
@@ -319,10 +315,10 @@ You will now replace the configuration of the instances using the `webapp` modul
 
 Follow the same procedure used for the `cluster` module.
 
-1. Import the module `webapp` v0.1.0 that can be retrieved using the following address
-   > https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.1.0"
+1. Import the module `webapp` v0.3.0 that can be retrieved using the following address
+   > https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
 2. Configure the module `webapp`.
-3. Remove the `random_pet`, `aws_ami` and `template_file` resources.
+3. Remove the `random_pet`, `aws_ami` resources, adapt the user_data field.
 4. Plan, and when ready, apply.
 5. Access your webservers using the load balancer url.
     - Try refreshing the webpage several times. Does the name changes?
@@ -341,14 +337,14 @@ Follow the same procedure used for the `cluster` module.
 
 1. Module `webapp` and `module` setting
 
-```HCL
+```hcl
 
 module "webapp" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/webapp?ref=v0.1.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v0.3.0"
 }
 
 module "cluster" {
-  source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.1.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
@@ -361,7 +357,7 @@ module "cluster" {
   # Instance arguments
   ssh_key_name       = var.ssh_key_name
   ami_id             = module.webapp.ami_id # Change me
-  instance_type      = "t2.nano"
+  instance_type      = "t4g.nano"
   rendered_user_data = module.webapp.rendered_user_data  # Change me
 
   # Autoscaling group arguments
@@ -373,40 +369,6 @@ module "cluster" {
 2. Don't forget to update your outputs. Namely, the `debian_ami_id` output.
 
 </details>
-
-### Upgrading your modules
-
-You will now upgrade your modules to version `v0.2.0`.
-
-- The `webapp` module now return a webpage with
-    - The random pet name from terraform
-    - A random pet name generated during the instance initialisation
-- The `cluster` module will now refresh automatically instances upon changes of the `webapp`.
-
-To upgrade your modules
-
-1. Replace in both module sources the tag `v0.1.0` by `v0.2.0`
-2. Add the new argument `instance_warmup` to the `cluster` module, i.e.,
-
-   ```HCL
-   module "cluster" {
-     source = "https://gitea.kleis.ch/Public/terraform-training-modules.git//modules/cluster?ref=v0.2.0"
-
-     ... # Other arguments
-
-     # Autoscaling group arguments
-     min_instance    = 2
-     max_instance    = 4
-     instance_warmup = 15 # Making instance refreshes faster
-   }
-   ```
-
-3. Init, plan and apply your recipe.
-4. Check what is happening over the next 2-3 minutes on
-   your [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:).
-    - What happens if you access and refresh your webpage now?
-    - _Tip 1: Reuse the previous shell commands._
-    - _Tip 2: This may take a few minute. Launch the command and go grab a coffee._
 
 ## Leads for further exploration
 

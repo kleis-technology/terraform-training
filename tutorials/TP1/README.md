@@ -1,6 +1,6 @@
 # Introduction to Terraform CLI
 
-In this practical, we will set up your environment and see how to interact with the Terraform commandline client.
+In this exercise, we will set up your environment and see how to interact with the Terraform commandline client.
 
 ## Setting up your environment
 
@@ -16,14 +16,10 @@ management system (e.g., homebrew/aptitude/yay).
 1. The Terraform Command Line Interface
     - Follow the `Install terraform` section
       of [guide on Terraform website](https://learn.hashicorp.com/tutorials/terraform/install-cli#install-terraform)
-1. Optional
-    - If you are using `antigen` to customize your shell, you may want to update your shell configuration with
-        - `antigen bundle aws`
-        - `antigen bundle terraform`,
 1. Check your installation with
     - `git --version`
     - `aws --version`
-    - `terraform --version` _(v0.14+ required)_
+    - `terraform --version`
 
 You are now ready to start the first TP.
 

@@ -2,29 +2,28 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 6.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.1"
+      version = "~> 3.0"
     }
   }
   backend "s3" {
-    acl     = "private"
-    encrypt = true
+    acl          = "private"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
-provider "aws" {
-}
+provider "aws" {}
 
-provider "random" {
-}
+provider "random" {}
 
-data "aws_ami" "debian_buster" {
+data "aws_ami" "debian_latest" {
   owners      = ["136693071363"]
   most_recent = true
-  name_regex  = "debian-10-amd64-*"
+  name_regex  = "debian-13-amd64-*"
 }
 
 resource "random_pet" "pet_name" {
@@ -34,38 +33,29 @@ resource "random_pet" "pet_name" {
   }
 }
 
-data "template_file" "user_data" {
-  template = file("user-data.sh")
-
-  vars = {
-    server_name = random_pet.pet_name.id
-  }
-}
-
 data "terraform_remote_state" "training" {
   backend = "s3"
   config = {
-    acl            = "private"
-    encrypt        = true
-    region         = "eu-west-1"
-    profile        = "kleis-sandbox"
-    role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
-    bucket         = "tfstate-kleis-organization"
-    key            = "kleis-sandbox/training/terraform.tfstate"
-    kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
-    dynamodb_table = "tfstate-lock"
+    acl          = "private"
+    encrypt      = true
+    region       = "eu-west-1"
+    profile      = "kleis-sandbox"
+    role_arn     = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+    bucket       = "tfstate-kleis-organization"
+    key          = "kleis-sandbox/training/terraform.tfstate"
+    kms_key_id   = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
+    use_lockfile = true
   }
 }
 
 resource "aws_instance" "only_ssh_vm" {
   # Create one instance if var.with_webpage is set to false
-  count                  = var.with_webpage ? 0 : 1
-  ami                    = data.aws_ami.debian_buster.id
-  instance_type          = "t2.nano"
-  key_name               = var.ssh_key_name
-  subnet_id              = data.terraform_remote_state.training.outputs.subnet_id
-  vpc_security_group_ids = [data.terraform_remote_state.training.outputs.vm_security_group_id]
-  #user_data                   = data.template_file.user_data.rendered
+  count                       = var.with_webpage ? 0 : 1
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
+  key_name                    = var.ssh_key_name
+  subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
+  vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
   associate_public_ip_address = true
   tags = {
     Name = "kleis-training-ssh-vm"
@@ -75,13 +65,15 @@ resource "aws_instance" "only_ssh_vm" {
 resource "aws_instance" "webserver_vm" {
   # Create one instance if var.with_webpage is set to true
   count                       = var.with_webpage ? 1 : 0
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = var.ssh_key_name
   subnet_id                   = data.terraform_remote_state.training.outputs.subnet_id
   vpc_security_group_ids      = [data.terraform_remote_state.training.outputs.vm_security_group_id]
   associate_public_ip_address = true
-  user_data                   = data.template_file.user_data.rendered
+  user_data = templatefile("user-data.sh", {
+    server_name = random_pet.pet_name.id
+  })
   tags = {
     Name = "kleis-training-webserver-vm"
   }

@@ -9,6 +9,6 @@ variable "subnet" {
 }
 
 variable "vpc_security_groups" {
-  type        = list(any)
+  type        = list(string)
   description = "ID(s) of the security groups associated with the VPC."
 }

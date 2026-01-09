@@ -1,6 +1,6 @@
 
 output "debian_ami_id" {
-  value = data.aws_ami.debian_buster.id
+  value = data.aws_ami.debian_latest.id
 }
 
 output "vm_ip" {

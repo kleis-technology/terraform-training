@@ -4,7 +4,7 @@ In this exercise, we will improve the previous recipe with additional Terraform 
 
 ### Goal
 
-You will build a Terraform configuration to instantiate a Debian Booster virtual machine. The default behavior of this instance will be to
+You will build a Terraform configuration to instantiate a Debian virtual machine. The default behavior of this instance will be to
 allow SSH connections authenticated with your ssh key. In a second step, you will update this instance to serve a simple web page.
 
 ### Context
@@ -15,7 +15,7 @@ A basic AWS infrastructure is provided to you for this exercise. It includes :
 
 - A virtual network (Amazon Virtual Private Cloud - VPC)
 - A security policy for this network that allows entering ssh connections and tcp connections (on port 8000).
-- An AWS iam access key and key-pair associated to your username
+- An AWS iam access key and SSH key-pair associated to your username
 
 #### Setting/resetting recipe
 
@@ -52,9 +52,9 @@ The bucket used for the previous step won't be required. Start by removing this 
 
 1. Remove the following blocks
 
-```HCL
-resource "random_pet" "bucket" {
-}
+```hcl
+resource "random_pet" "bucket" {}
+
 resource "aws_s3_bucket" "bucket" {
   bucket_prefix = "${random_pet.bucket.id}-"
 }
@@ -78,41 +78,41 @@ Declaring an AWS instance will require several steps.
 You will use a data source to query the AMI from the aws catalog:
 the [aws_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) data source.
 
-Retrieve the latest debian buster (debian 10) image from the official debian aws account. The debian AWS owner ID can be found on the
-following [debian webpage](https://wiki.debian.org/Cloud/AmazonEC2Image/Buster),
+Retrieve the latest debian (13) image from the official debian aws account. The debian AWS owner ID can be found on the
+following [debian webpage](https://wiki.debian.org/Cloud/AmazonEC2Image),
 
 > AWS account ID = 136693071363.
 
-Use this ID to query the latest debian buster image, using a data block, as follows
+Use this ID to query the latest debian 13 image, using a data block, as follows
 
-```HCL
-data "aws_ami" "debian_buster" {
+```hcl
+data "aws_ami" "debian_latest" {
   owners      = ["136693071363"]
   most_recent = true
-  name_regex  = "debian-10-amd64-*"
+  name_regex  = "debian-13-amd64-*"
 }
 ```
 
-This block will provide the `data.aws_ami.debian_buster.id` attribute that returns the AMI id matching the request.
+This block will provide the `data.aws_ami.debian_latest.id` attribute that returns the AMI id matching the request.
 
 ### Declaring the AWS Instance
 
-Now that you have determined the debian buster AMI id, you will declare an AWS Instance.
+Now that you have determined the latest debian 13 AMI id, you will declare an AWS Instance.
 
-For that matter, use the [aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) resource.
+For that, we use the [aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) resource.
 
-```HCL
+```hcl
 resource "aws_instance" "vm" {
-  ami           = data.aws_ami.debian_buster.id
-  instance_type = "t2.nano"
+  ami           = data.aws_ami.debian_latest.id
+  instance_type = "t4g.nano"
   tags          = {
     Name = "kleis-training-vm"
   }
 }
 ```
 
-The arguments provided to the `aws_instance` declares that one `debian_buster` AMI is instantiated on an Amazon EC2 `t2.nano`
-instance ([more info](https://aws.amazon.com/ec2/instance-types/t2/)).
+The arguments provided to the `aws_instance` declares that one debian 13 AMI is instantiated on an Amazon EC2 `t4g.nano`
+instance ([more info](https://aws.amazon.com/ec2/instance-types/t4/)).
 
 #### What is missing?
 
@@ -121,27 +121,26 @@ Applying the previous configuration will result in an error (_try it!_).
 1. You must define on which Virtual Private Cloud (VPC), that is on which virtual network, your instance will run. Add the following
    arguments to your `aws_instance`:
 
-```HCL
-    # The subnet in the VPC configured for the kleis-sandbox account
+```hcl
+# The subnet in the VPC configured for the kleis-sandbox account
 subnet_id              = "subnet-0f496149517fb7839"
 # The security group associated with your account
 vpc_security_group_ids = ["sg-0a1eb414e2846d207"]
 ```
 
-2. More informations are missing to be able to connect to the VM.
+2. More information is missing to be able to connect to the VM.
 
     - Will your virtual machine have a dedicated public IP?
         - _hint_: Look at
-          the [`associate_public_ip_address` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#associate_public_ip_address)
+          the [`associate_public_ip_address` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#associate_public_ip_address-1)
     - How will you authenticate yourself on the virtual machine?
         - _hint_: Look at
-          the [`key_name` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#key_name)
+          the [`key_name` argument](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#key_name-1)
 
-3. Update your resource with your `key_name`, and specify whether your want to have an associated public IP.
+3. Update your resource with your `key_name`, and specify whether you want to have an associated public IP.
 4. Plan, and apply your configuration when ready.
 5. Find the IP address of your virtual machine and establish a ssh connection with it.
     - `ssh -i <PATH/TO/YOUR/KEY> admin@<YOUR_VM_IP>`
-    - Provide the path to your private ssh key and your virual machine public IP.
 
 #### Solution
 
@@ -150,10 +149,10 @@ vpc_security_group_ids = ["sg-0a1eb414e2846d207"]
 
 Expected outcome:
 
-```HCL
+```hcl
 resource "aws_instance" "vm" {
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = ... # YOUR KEY NAME
   subnet_id                   = "subnet-0f496149517fb7839"
   vpc_security_group_ids      = ["sg-0a1eb414e2846d207"]
@@ -165,16 +164,16 @@ resource "aws_instance" "vm" {
 ```
 
 2. Plan, and apply your configuration.
-3. Is your instance running? Check in the [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#Home:)
+3. Is your instance running? Check in the [AWS console](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Home:)
 4. Use `terraform show` to find the public IP of your virtual machine.
 
 </details>
 
 ## Using Variables and Outputs to clean-up your configuration
 
-You might want to think about how to simplify the usage of your configuration. For instance, consider:
+You might want to think about how to simplify your configuration. For instance, consider:
 
-- What if you aren't the only user? (_hint:_ inputs +`key_name`)
+- What if you aren't the only user? (_hint:_ variable inputs +`key_name`)
 - How to automatically retrieve your public IP address? (_hint:_ outputs + `public_ip`)
 
 ### Specifying your variables
@@ -202,7 +201,7 @@ Think about good practices.
 
 1. `variables.tf` content
 
-```HCL
+```hcl
 variable "ssh_key_name" {
   type        = string
   description = "Name of the aws key-pair assigned to this user."
@@ -217,16 +216,14 @@ variable "vpc_security_groups" {
   type        = list(string)
   description = "ID(s) of the security groups associated with the VPC."
 }
-
-
 ```
 
 2. Update your `aws_instance` resource to use these variables
 
-```HCL
+```hcl
 resource "aws_instance" "vm" {
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
+  ami                         = data.aws_ami.debian_latest.id
+  instance_type               = "t4g.nano"
   key_name                    = var.ssh_key_name
   subnet_id                   = var.subnet
   vpc_security_group_ids      = var.vpc_security_groups
@@ -247,7 +244,7 @@ Try to decide which outputs could be convenient to have access with `terraform o
 
 Create a `outputs.tf` (_good practices!_) and add an output for the following attributes
 
-- The ID of the `debian_buster` AMI.
+- The ID of the `debian_latest` AMI.
 - The public IP of your `vm`.
 
 #### Solution
@@ -257,9 +254,9 @@ Create a `outputs.tf` (_good practices!_) and add an output for the following at
 
 1. `outputs.tf` content:
 
-```HCL
+```hcl
 output "debian_ami_id" {
-  value = data.aws_ami.debian_buster.id
+  value = data.aws_ami.debian_latest.id
 }
 
 output "vm_ip" {
@@ -273,11 +270,11 @@ output "vm_ip" {
 
 Plan, and apply your improved configuration. Use `terraform output` to retrieve your outputs.
 
-_Did that last `apply` resulted in resource deletion and creation, or was it mostly in-place?_
+_Did that last `apply` result in resource deletion and creation, or was it mostly in-place?_
 
 ## Serving a webpage from your VM
 
-Why you could be tempted to configure the VM using the working ssh connection... It would definitely be against the guiding principles of
+While you could be tempted to configure the VM using the working ssh connection... It would definitely be against the guiding principles of
 Infrastructure as Code!
 
 Including the configuration of the VM in the Terraform recipe will solve this issue. This can be achieved by
@@ -287,10 +284,10 @@ Including the configuration of the VM in the Terraform recipe will solve this is
 
 ### Importing a configuration file
 
-Locate the `user-data.sh` script available in the `script` folder. This script simply creates a phony html page and serves it using
-a `python3` http server (_spoiler: we do not advocate for this approach in practice_).
+Locate the `user-data.sh` script available in the `script` folder. This script creates a html page and serves it using
+a the nginx server.
 
-Note that it contains two _uninitialized variables_ (i.e. `${server_name}`).
+Note that it contains an _uninitialized variable_ (i.e. `${server_name}`).
 
 #### Reading a file
 
@@ -305,6 +302,8 @@ Try typing the following commands in your terminal.
 ```
 
 #### Instantiating a template file
+
+Template files also have their own `templatefile` [function](https://developer.hashicorp.com/terraform/language/functions/templatefile)
 
 Declare a [`template_file` data source](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) and
 the `file` function to load and parametrize the `user-data.sh`.
@@ -324,33 +323,21 @@ the `file` function to load and parametrize the `user-data.sh`.
 
 1. Expected changes in `main.tf`:
 
-```HCL
+```hcl
+# [...]
+
 resource "random_pet" "pet_name" {
   keepers = {
     # Generate a new pet name each time a new AMI id is used
-    ami_id = data.aws_ami.debian_buster.id
-  }
-}
-
-data "template_file" "user_data" {
-  template = file("user-data.sh")
-
-  vars = {
-    server_name = random_pet.pet_name.id
+    ami_id = data.aws_ami.debian_latest.id
   }
 }
 
 resource "aws_instance" "vm" {
-  ami                         = data.aws_ami.debian_buster.id
-  instance_type               = "t2.nano"
-  key_name                    = var.ssh_key_name
-  subnet_id                   = var.subnet
-  vpc_security_group_ids      = var.vpc_security_groups
-  associate_public_ip_address = true
-  user_data                   = data.template_file.user_data.rendered # Add me!
-  tags                        = {
-    Name = "kleis-training-vm"
-  }
+  # ...
+  user_data = templatefile("user-data.sh", {
+    server_name = random_pet.pet_name.id
+  })
 }
 ```
 
@@ -362,8 +349,8 @@ resource "aws_instance" "vm" {
 ## Leads for further exploration
 
 - How would you test if your VM is working properly after provisioning?
-- Could that be automated in some way?
+- Could that be automated in some way? ([checks](https://developer.hashicorp.com/terraform/language/v1.9.x/checks))
 
 ## Troubleshooting
 
-You can look for the solution of this practical in `tutorials/solutions/TP3/`.
+You can look for the solution of this exercise in `tutorials/solutions/TP3/`.

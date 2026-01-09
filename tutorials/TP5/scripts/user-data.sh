@@ -14,4 +14,4 @@ else
   echo "<h1>Hello world!<h1>"
 fi >/var/www/html/index.html
 
-echo "<h2>My name is ${server_name}.</h2>" >>/var/www/html/index.html
+echo "<p>My name is <q>${server_name}</q>.</p>" >>/var/www/html/index.html

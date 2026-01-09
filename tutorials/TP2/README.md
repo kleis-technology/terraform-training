@@ -1,6 +1,6 @@
 # Introduction to Terraform configurations
 
-In this practical, we will see how to define a Terraform configuration and explore the Terraform state.
+In this exercise, we will see how to define a Terraform configuration and explore the Terraform state.
 
 ### Goal
 
@@ -9,7 +9,7 @@ Terraform state after provisioning.
 
 ### Context
 
-Start this practical from the previous configuration (i.e., `main.tf`).
+Start this exercise from the previous configuration (i.e., `main.tf`).
 
 ## Understanding the previous configuration
 
@@ -19,13 +19,13 @@ The starting configuration includes the AWS provider, and an AWS S3 Bucket as re
 
 The AWS provider is declared in two different blocks.
 
-```HCL
+```hcl
 # First block
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -36,10 +36,9 @@ terraform {
     - What is the constraint imposed on the version of the provider?
     - Is the provider yet imported?
 
-```HCL
+```hcl
 # Second block
-provider "aws" {
-}
+provider "aws" {}
 ```
 
 2. The second block declare the AWS provider.
@@ -50,7 +49,7 @@ provider "aws" {
 To create an infrastructure, you need at least one resource. The following resource block declare an AWS S3 bucket (i.e., a container stored
 in Amazon S3).
 
-```HCL
+```hcl
 resource "aws_s3_bucket" "bucket" {
   bucket_prefix = "stage-1-"
 }
@@ -60,7 +59,7 @@ This code will create a bucket with a unique name prefixed with `stage-1-`.
 
 ### Re-apply this configuration
 
-If you have destroyed this configuration in the previous practical, re-apply it.
+If you have destroyed this configuration in the previous exercise, re-apply it.
 
 1. Make sure if the configuration already exists or not.
 
@@ -100,7 +99,7 @@ less terraform.tfstate
 
 3. Answer those questions
     - What are the difference between the two previous representations of the state?
-    - Can you find your bucket using the [AWS console](https://s3.console.aws.amazon.com/s3/home?region=us-west-1#)?
+    - Can you find your bucket using the [AWS console](https://s3.console.aws.amazon.com/s3/home?region=us-west-1)?
 
 ## Importing and using an additional provider
 
@@ -115,7 +114,7 @@ First, you will import the provider Random, and then alter the S3 bucket resourc
 2. Locate the `Use Provider` button, top-right and interact with it.
 3. Follow the instruction to install the provider.
     - _Hint: multiple providers constraints can coexist in the `required_providers` block_
-4. (opt) Change the requirements to use the latest 3.1 version of the provider.
+4. (opt) Try pinning the random provider to the latest major version
 
 Before continuing, answer the following questions:
 
@@ -129,25 +128,23 @@ Before continuing, answer the following questions:
 
 1. Declaring the providers:
 
-```HCL
+```hcl
 terraform {
   required_providers {
     aws    = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 6.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.1.0"
+      version = "~> 3.0"
     }
   }
 }
 
-provider "aws" {
-}
+provider "aws" {}
 
-provider "random" {
-}
+provider "random" {}
 ```
 
 2. Importing them
@@ -183,14 +180,13 @@ Before continuing, answer the following questions:
 
 1. Add a new `random_pet` resource to your recipe.
 
-```HCL
-resource "random_pet" "bucket" {
-}
+```hcl
+resource "random_pet" "bucket" {}
 ```
 
 2. Update the `aws_s3_bucket` resource to use the `random_pet` attribute.
 
-```HCL
+```hcl
 resource "aws_s3_bucket" "bucket" {
   bucket_prefix = "${random_pet.bucket.id}-"
 }
@@ -218,4 +214,4 @@ state.
 
 ## Troubleshooting
 
-You can look for the solution of this practical in `tutorials/solutions/TP2/`.
+You can look for the solution of this exercise in `tutorials/solutions/TP2/`.
