@@ -89,7 +89,7 @@ Use this ID to query the latest debian 13 image, using a data block, as follows
 data "aws_ami" "debian_latest" {
   owners      = ["136693071363"]
   most_recent = true
-  name_regex  = "debian-13-amd64-*"
+  name_regex  = "debian-13-arm64-*"
 }
 ```
 
@@ -123,9 +123,9 @@ Applying the previous configuration will result in an error (_try it!_).
 
 ```hcl
 # The subnet in the VPC configured for the kleis-sandbox account
-subnet_id              = "subnet-0f496149517fb7839"
+subnet_id              = "subnet-05a4e75452749a0ae"
 # The security group associated with your account
-vpc_security_group_ids = ["sg-0a1eb414e2846d207"]
+vpc_security_group_ids = ["sg-0441b1b7eec8de88e"]
 ```
 
 2. More information is missing to be able to connect to the VM.
@@ -154,8 +154,8 @@ resource "aws_instance" "vm" {
   ami                         = data.aws_ami.debian_latest.id
   instance_type               = "t4g.nano"
   key_name                    = ... # YOUR KEY NAME
-  subnet_id                   = "subnet-0f496149517fb7839"
-  vpc_security_group_ids      = ["sg-0a1eb414e2846d207"]
+  subnet_id                   = "subnet-05a4e75452749a0ae"
+  vpc_security_group_ids      = ["sg-0441b1b7eec8de88e"]
   associate_public_ip_address = true
   tags                        = {
     Name = "kleis-training-vm"

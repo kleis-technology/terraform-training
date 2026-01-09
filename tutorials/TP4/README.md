@@ -108,7 +108,6 @@ First, create the `backend.tfvars` file and add the following information about 
 
 ```hcl
 region   = "eu-west-1"
-profile  = "kleis-sandbox"
 role_arn = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
 bucket   = "tfstate-kleis-organization"
 key      = "kleis-sandbox/training/remote_state/${YOUR_USERNAME}/terraform.tfstate"
@@ -208,7 +207,6 @@ The same exact procedure can be used to initialize a Terraform configuration fro
 
 ```hcl
 region         = "eu-west-1"
-profile        = "kleis-sandbox"
 role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
 bucket         = "tfstate-kleis-organization"
 key            = "kleis-sandbox/training/remote_state/YOUR_USERNAME/terraform.tfstate"
@@ -259,11 +257,12 @@ see [terraform_remote_state](https://registry.terraform.io/providers/hashicorp/t
 data "terraform_remote_state" "training" {
   backend = "s3"
   config  = {
+    assume_role = {
+      role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+    }
     acl            = "private"
     encrypt        = true
     region         = "eu-west-1"
-    profile        = "kleis-sandbox"
-    role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
     bucket         = "tfstate-kleis-organization"
     key            = "kleis-sandbox/training/terraform.tfstate"
     kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"

@@ -1,2 +1,2 @@
-subnet              = "subnet-0f496149517fb7839"
-vpc_security_groups = ["sg-0a1eb414e2846d207"]
+subnet              = "subnet-05a4e75452749a0ae"
+vpc_security_groups = ["sg-0441b1b7eec8de88e"]

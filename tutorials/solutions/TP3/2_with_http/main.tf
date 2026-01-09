@@ -18,7 +18,7 @@ provider "random" {}
 data "aws_ami" "debian_latest" {
   owners      = ["136693071363"]
   most_recent = true
-  name_regex  = "debian-13-amd64-*"
+  name_regex  = "debian-13-arm64-*"
 }
 
 resource "random_pet" "pet_name" {
