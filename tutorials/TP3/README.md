@@ -303,10 +303,7 @@ Try typing the following commands in your terminal.
 
 #### Instantiating a template file
 
-Template files also have their own `templatefile` [function](https://developer.hashicorp.com/terraform/language/functions/templatefile)
-
-Declare a [`template_file` data source](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) and
-the `file` function to load and parametrize the `user-data.sh`.
+Template files also have their own `templatefile` [function](https://developer.hashicorp.com/terraform/language/functions/templatefile), which you can use to load and fill a template into data, to be then assigned to an attribute. For example, you can provide such data containing a shell script to an aws_instance `user_data` attribute to have that script executed on boot. Use this to load the `user-data.sh` inside an aws_instance, providing it with the required information.
 
 1. Give a name to your server (i.e., `${server_name}`). Use a random pet name to add some flavor!
     - _Hint: Under which occasion will the random pet name change?_
