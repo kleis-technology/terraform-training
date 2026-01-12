@@ -54,7 +54,7 @@ data "terraform_remote_state" "training" {
 resource "random_pet" "cluster" {}
 
 module "cluster" {
-  source = "github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
+  source = "github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id

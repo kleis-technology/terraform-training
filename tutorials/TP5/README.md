@@ -221,7 +221,7 @@ This declares to use the module `cluster`.
 
 - From the github repository `kleis-technology/terraform-example-modules.git`
 - Located in the `//modules/cluster`
-- With version `?ref=v0.3.0` (i.e., Git tag in this case)
+- With version `?ref=v1.0.0` (i.e., Git tag in this case)
 
 Then, run `terraform init -backend-config="backend.tfvars"`
 
@@ -248,7 +248,7 @@ and defines that
 
 ```hcl
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -315,8 +315,8 @@ You will now replace the configuration of the instances using the `webapp` modul
 
 Follow the same procedure used for the `cluster` module.
 
-1. Import the module `webapp` v0.3.0 that can be retrieved using the following address
-   > https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v0.1.0"
+1. Import the module `webapp` v1.0.0 that can be retrieved using the following address
+   > https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v1.0.0"
 2. Configure the module `webapp`.
 3. Remove the `random_pet`, `aws_ami` resources, adapt the user_data field.
 4. Plan, and when ready, apply.
@@ -340,11 +340,11 @@ Follow the same procedure used for the `cluster` module.
 ```hcl
 
 module "webapp" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v0.3.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v1.0.0"
 }
 
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
@@ -377,4 +377,4 @@ module "cluster" {
 
 ## Troubleshooting
 
-You can look for the solution of this practical in `tutorials/solutions/TP5`.
+You can look for the solution of this exercise in `tutorials/solutions/TP5`.
