@@ -191,7 +191,7 @@ This Git repository contains the modules
 - `webapp` in folder `modules/webapp`
 - `cluster` in folder `modules/cluster`
 
-Start by using the `v0.1.0` version of these modules that provides
+Start by using the `v1.0.0` version of these modules that provides
 
 - A simple `webapp` _configuration_: that is, an AMI and a rendered websever configuration script.
 - A simple functional `cluster`.
@@ -212,7 +212,7 @@ First, add the module into your recipe as follows
 
 ```hcl
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v0.3.0"
+  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
   # No arguments for now
 }
 ```
