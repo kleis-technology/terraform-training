@@ -1,5 +1,4 @@
 region   = "eu-west-1"
-profile  = "kleis-sandbox"
 role_arn = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
 bucket   = "tfstate-kleis-organization"
 # TODO

@@ -116,7 +116,7 @@ key      = "kleis-sandbox/training/remote_state/${YOUR_USERNAME}/terraform.tfsta
 ```
 
 These attributes tell Terraform the location of the S3 bucket (_region_ and _bucket_), path to the state file (_key_) and the credentials and
-role to assume (_profile_ and _role_arn_).
+role to assume (_role_arn_).
 
 Make sure to replace `MY_USERNAME` in the `key` attribute with your username.
 
