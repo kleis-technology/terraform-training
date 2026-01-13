@@ -108,7 +108,9 @@ First, create the `backend.tfvars` file and add the following information about 
 
 ```hcl
 region   = "eu-west-1"
-role_arn = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+assume_role = {
+  role_arn = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-sandbox"
+}
 bucket   = "tfstate-kleis-organization"
 key      = "kleis-sandbox/training/remote_state/${YOUR_USERNAME}/terraform.tfstate"
 ```
