@@ -212,7 +212,7 @@ First, add the module into your recipe as follows
 
 ```hcl
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
+  source = "github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
   # No arguments for now
 }
 ```
@@ -248,7 +248,7 @@ and defines that
 
 ```hcl
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
+  source = "github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
 
   ## General arguments
   cluster_name = random_pet.cluster.id
@@ -340,11 +340,11 @@ Follow the same procedure used for the `cluster` module.
 ```hcl
 
 module "webapp" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v1.0.0"
+  source = "github.com/kleis-technology/terraform-example-modules.git//modules/webapp?ref=v1.0.0"
 }
 
 module "cluster" {
-  source = "https://github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
+  source = "github.com/kleis-technology/terraform-example-modules.git//modules/cluster?ref=v1.0.0"
 
   # General arguments
   cluster_name = random_pet.cluster.id
