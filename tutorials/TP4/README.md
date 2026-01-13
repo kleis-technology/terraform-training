@@ -213,7 +213,6 @@ role_arn       = "arn:aws:iam::717257079239:role/KleisAllowStateBucket-kleis-san
 bucket         = "tfstate-kleis-organization"
 key            = "kleis-sandbox/training/remote_state/YOUR_USERNAME/terraform.tfstate"
 kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
-dynamodb_table = "tfstate-lock"
 ```
 
 > **Don't forget to update the `key` attribute with your username.**
@@ -268,7 +267,6 @@ data "terraform_remote_state" "training" {
     bucket         = "tfstate-kleis-organization"
     key            = "kleis-sandbox/training/terraform.tfstate"
     kms_key_id     = "4420e6a4-f5a7-4a2d-aa9a-a2b356a82b55"
-    dynamodb_table = "tfstate-lock"
   }
 }
 ```
